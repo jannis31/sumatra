@@ -111,7 +111,7 @@ $(function() {
         $.ajax({
           type: 'POST',
           url: label + '/',
-          data: {'digest':hexsha, 'show_script':true, 'path':path}
+          data: {'digest':hexsha, 'show_script':true, 'path':path, 'main_file': scrName}
         }).done(function(data) { 
              var modal_id = 'modal-code' + nb_wind,
                  code_id = 's-code' + nb_wind;

@@ -117,11 +117,15 @@ class GitWorkingCopy(WorkingCopy):
         g = git.Git(self.path)
         return g.diff('HEAD', color='never')
 
-    def content(self, digest):
+    def content(self, digest, main_file=None):
         repo = git.Repo(self.path)
         for item in repo.iter_commits('master'):
             if item.hexsha == digest:
                 file_content = item.tree.blobs[0].data_stream.read()
+                for blob in item.tree.blobs:
+                    if blob.name == main_file:
+                        file_content = blob.data_stream.read()
+                        return file_content
         return file_content
 
     def contains(self, path):

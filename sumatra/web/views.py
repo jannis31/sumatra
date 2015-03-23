@@ -107,7 +107,8 @@ def record_detail(request, project, label):
             path = request.POST.get('path', False)
             path = str(path).encode("string_escape")
             wc = get_working_copy(path)
-            file_content = wc.content(digest)
+            main_file = request.POST.get('main_file', False)
+            file_content = wc.content(digest, main_file)
             return HttpResponse(file_content)
         elif request.POST.has_key('compare_records'):
             labels = request.POST.getlist('records[]')
