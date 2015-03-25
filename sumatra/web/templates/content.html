@@ -88,6 +88,9 @@
             <label class='t-item head-item' id='l-version' for="version-t">Version</label> 
             <input type="radio" id="arguments" />
             <label class='t-item head-item' id='l-arguments' for="arguments-t">Arguments</label>
+<!--            <input type="radio" id="parameters" />-->
+<!--            <label class='t-item head-item' id='l-parameters' for="parameters-t">Parameters</label>-->
+
         </div>
     </div>
     <ol id ='ol-content'>
@@ -112,7 +115,8 @@
         <div class='row-item' id='eversion-t'>{{record.executable.version}}</div>
         <div class='row-item' id='main-t'><a class='id-script' data-toggle="modal" href="#">{{record.main_file}}</a></div>
         <div class='row-item' id='version-t'><span class="span-box">{{record.version|cut:"vers"}}{% if record.diff %}*{% endif %}</span></div>
-        <div class='row-item' id='arguments-t'><a class='href_args' href='#'>{{record.script_arguments}}</a></div>
+        <div class='row-item' id='arguments-t'><a class='href_args' href='#' title="{{record.parameters.to_sumatra}}">{{record.script_arguments}}</a></div>
+<!--        <div class='row-item' id='parameters-t'>{{record.parameters.to_sumatra}}</div>-->
         <br>
       </li>
     {% endfor %}

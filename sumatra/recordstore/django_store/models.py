@@ -191,6 +191,13 @@ class DataKey(BaseModel):
     def get_metadata(self):
         return eval(self.metadata)  # should probably use json.decode
 
+    @property
+    def label(self):
+        return self.path.split('.')[0]
+
+    def get_record(self):
+        return Record.objects.get(label=self.label)
+
     def to_sumatra(self):
         metadata = eval(self.metadata)
         return datastore.DataKey(self.path, self.digest, **metadata)

@@ -34,7 +34,7 @@ $(document).ready(function(){
         if (!selected.length){
           $('#body-comp,#head-comp').empty();
         }else{
-          $('#body-comp').load('nolabel/', {'compare_records':true, records: selected});
+          $('#body-comp').load('/{{project_name}}/nolabel/', {'compare_records':true, records: selected});
         }
     });
 });

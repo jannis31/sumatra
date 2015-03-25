@@ -73,12 +73,15 @@
                 <table>
                     <tr><td colspan="4">{{record.input_datastore.access_parameters.root}}</td></tr>
                     {% for file in record.input_data.all %}
-                           <tr class="{% cycle odd even %}"><td><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}&type=input">{{file.path}}</a></td>
+                           <tr class="{% cycle odd even %} record ui-selected">
+                           <td id="label-t"><a id="{{file.label}}" class="input_label" href="/{{project_name}}/{{file.label}}/" title="{{file.get_record.parameters.to_sumatra}}">{{file.label|urlencode}}</a></td>
+                           <td style="border-left: 1px solid #eeeeee; padding-left:10px"><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}&type=input">{{file.path}}</a></td>
                            <td>{{file.digest}}</td>
                            <td>{{file.get_metadata.mimetype|default:""}}</td>
                            <td>{{file.get_metadata.size|filesizeformat}}</td></tr>
                     {% endfor %}
                 </table>
+                <div id="input-comp" data-toggle="modal" href="#compareSim">compare input files</div>
                 {% else %}
                     no input files
                 {% endif %}
@@ -96,7 +99,8 @@
                 <table>
                     <tr><td colspan="4">{{record.datastore.access_parameters.root}}</td></tr>
                         {% for file in record.output_data.all %}
-                                <tr class="{% cycle 'odd' 'even' %}"><td><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}">{{file.path}}</a></td>
+                                <tr class="{% cycle 'odd' 'even' %}">
+                                <td><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}">{{file.path}}</a></td>
                                 <td>{{file.digest}}</td>
                                 <td>{{file.get_metadata.mimetype|default:""}}</td>
                                 <td>{{file.get_metadata.size|filesizeformat}}</td></tr>
@@ -165,14 +169,34 @@
         </fieldset>
     </form>
 </div>
-<script type = 'text/javascript' src='/media/js/jquery-1.7.2.min.js'></script>
+
+{% include "comparison_window.html" %} <!-- 'compare selected records' popup window -->
+
 <script type = 'text/javascript'>
+var nbSelected = 3;
+
 $(document).ready(function(){
-        $('.accordion').find('h2').click(function(){
-		    $(this).next().slideToggle();
-		}).next()//.hide();
-		$('#accordion-js').find('#additional').next().hide();
-        $('#stdout').css('width', $('h2.topic').width());
+    $('.modal').modal().modal('hide');
+
+    $('.accordion').find('h2').click(function(){
+        $(this).next().slideToggle();
+    }).next()//.hide();
+    $('#accordion-js').find('#additional').next().hide();
+    $('#stdout').css('width', $('h2.topic').width());
+
+    //click on the 'compare records' button
+    $('#input-comp').live('click', function(){ 
+        var $div_list = $('#alist-labels').empty();
+//        var list = {labels: $.makeArray($('.input_label').map(function() { return this.id; })), tags: []};
+        var list = labelList(false, $div_list);
+        $('#body-comp').load('/{{project_name}}/nolabel/', {'compare_records':true, records: list.labels});
+
+        for(var i = 0; i < 2; i++){ // only for the first two records
+            var el = $('#alist-labels').children()[i]; // not the best way
+            $(el).addClass('label-success');
+        }
+    });
+
 });
 </script>
 

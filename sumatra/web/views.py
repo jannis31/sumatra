@@ -95,6 +95,8 @@ def record_detail(request, project, label):
     if label != 'nolabel':
         label = unescape(label)
         record = Record.objects.get(label=label, project__id=project)
+        for file in record.input_data.all():
+            print file.get_record().parameters.to_sumatra()
     if request.method == 'POST':
         if request.POST.has_key('delete'):  # in this version the page record_detail doesn't have delete option
             record.delete()
@@ -114,11 +116,10 @@ def record_detail(request, project, label):
             labels = request.POST.getlist('records[]')
             records = Record.objects.filter(project__id=project)
             records = records.filter(label__in=labels[:2])  # by now we take only two records
-            for record in records:
-                if record.script_arguments == '<parameters>':
-                    record.script_arguments = record.parameters.to_sumatra()
-            dic = {'records': records}
-            return render_to_response('comparison_framework.html', dic)
+#            for record in records:
+#                if record.script_arguments == '<parameters>':
+#                    record.script_arguments = record.parameters.to_sumatra()
+            return render_to_response('comparison_framework.html', {'records': records})
         else:
             form = RecordUpdateForm(request.POST, instance=record)
             if form.is_valid():

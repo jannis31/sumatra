@@ -1,3 +1,4 @@
+if ($('#head_t').length) {
 $(document).scroll(function(){
     // If has not activated (has no attribute "data-top"
     if (!$('#head_t').attr('data-top')) {
@@ -13,3 +14,4 @@ $(document).scroll(function(){
     else
         $('#head_t').removeClass('subnav-fixed');
 });
+}

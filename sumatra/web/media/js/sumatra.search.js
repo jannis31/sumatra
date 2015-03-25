@@ -39,6 +39,7 @@ function getSearchFormOb(){
     return values;
 };
 
+if ($('#div_menu_search').length ) {
 $(function() {
 	// initialization of jquery-ui datepicker used in the seach drop-down list
     $( "#id_timestamp, #id_datewithin" ).datepicker();
@@ -91,3 +92,4 @@ $(function() {
         $('#innerContent').load('search', searchFormOb);
     });
 });
+}
