@@ -499,11 +499,6 @@ def show_file(request, project, label):
                                    })
 
 
-
-var data = {};
-data['voltmeter'] = {{ network_obj.voltmeter_data|safe }};
-data['spike_detector'] = {{ network_obj.spike_detector_data_index|safe }};
-
 def download_file(request, project, label):
     label = unescape(label)
     path = request.GET['path']
