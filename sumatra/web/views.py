@@ -387,6 +387,8 @@ def show_file(request, project, label):
     else:
         data_store = get_data_store(record.input_datastore.type, eval(record.input_datastore.parameters))
     path = request.GET['path']
+    digest = request.GET['digest']
+    data_key = DataKey(path, digest)
     mimetype, encoding = mimetypes.guess_type(path)
 
     content = data_store.get_content(data_key)
