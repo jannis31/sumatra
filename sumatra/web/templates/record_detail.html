@@ -72,16 +72,20 @@
                 {% if record.input_data.count %}
                 <table>
                     <tr><td colspan="4">{{record.input_datastore.access_parameters.root}}</td></tr>
+                    <tr><td>Record</td><td colspan="3">File</td></tr>
+
                     {% for file in record.input_data.all %}
                            <tr class="{% cycle odd even %} record ui-selected">
-                           <td id="label-t"><a id="{{file.label}}" class="input_label" href="/{{project_name}}/{{file.label}}/" title="{{file.get_record.parameters.to_sumatra}}">{{file.label|urlencode}}</a></td>
-                           <td style="border-left: 1px solid #eeeeee; padding-left:10px"><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}&type=input">{{file.path}}</a></td>
+                            {% if file.get_record %}
+                           <td id="label-t"><a id="{{file.get_record.label}}" class="input_label" href="/{{project_name}}/{{file.get_record.label}}/" title="{{file.get_record.parameters.to_sumatra}}">{{file.get_record.label|urlencode}}</a></td>
+                            {% endif %}
+                           <td><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}&type=input">{{file.path}}</a></td>
                            <td>{{file.digest}}</td>
                            <td>{{file.get_metadata.mimetype|default:""}}</td>
                            <td>{{file.get_metadata.size|filesizeformat}}</td></tr>
                     {% endfor %}
                 </table>
-                <div id="input-comp" data-toggle="modal" href="#compareSim">compare input files</div>
+                <div id="input-comp" data-toggle="modal" href="#compareSim">compare input records</div>
                 {% else %}
                     no input files
                 {% endif %}
@@ -104,6 +108,7 @@
                                 <td>{{file.digest}}</td>
                                 <td>{{file.get_metadata.mimetype|default:""}}</td>
                                 <td>{{file.get_metadata.size|filesizeformat}}</td></tr>
+                                <td><a href="plotdata?path={{file.path|urlencode}}&digest={{file.digest}}">{{file.path}}</a></td>
                         {% endfor %}
                 </table>
             </div>
