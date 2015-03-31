@@ -203,7 +203,7 @@ class SimpleParameterSet(object):
         else:
             raise KeyError("%s not found" % k)
 
-    def pretty(self, expand_urls=False):
+    def pretty(self, expand_urls=False, delimiter='\n'):
         """
         Return a string representation of the parameter set, suitable for
         creating a new, identical parameter set.
@@ -220,7 +220,7 @@ class SimpleParameterSet(object):
                 output.append('%s = %s' % (name, value))
             if name in self.comments:
                 output[-1] += ' #%s' % self.comments[name]
-        return "\n".join(output)
+        return delimiter.join(output)
 
     def as_dict(self):
         return self.values.copy()

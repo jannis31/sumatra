@@ -226,8 +226,8 @@ class DjangoRecordStore(RecordStore):
             raise KeyError(label)
         return db_record.to_sumatra()
 
-    def list(self, project_name, tags=None):
-        db_records = self._manager.filter(project__id=project_name).select_related()
+    def list(self, project_name, tags=None, *args, **kwargs):
+        db_records = self._manager.filter(project__id=project_name, *args, **kwargs).select_related()
         if tags:
             if not hasattr(tags, "__len__"):
                 tags = [tags]
@@ -244,8 +244,8 @@ class DjangoRecordStore(RecordStore):
             raise Exception(errmsg)
         return records
 
-    def labels(self, project_name):
-        return [record.label for record in self._manager.filter(project__id=project_name)]
+    def labels(self, project_name, *args, **kwargs):
+        return [record.label for record in self._manager.filter(project__id=project_name, *args, **kwargs)]
 
     def delete(self, project_name, label):
         db_record = self._manager.get(label=label, project__id=project_name)
