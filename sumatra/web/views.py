@@ -381,25 +381,28 @@ def show_file(request, project, label):
                                    'errmsg': e
                                    })
 
-def plot_data(request, project):
-    path = request.GET['path']
-    data = np.loadtxt('Data/'+path)
-    if request.GET['plot'] == 'spikes':
-        return render_to_response("d3_raster_plot.html", {'data': data.tolist(), 'neurons':range(100), 'simtime':500, 
-                                        'path': path,
-                                       'project_name': project,})
-
-    elif request.GET['plot'] == 'voltage':
-        idx = request.GET.getlist('idx', [])
-        neurons = np.unique(data[:,0])
-        times = np.unique(data[:,1])
-        Vm = data[:,2].reshape(-1,neurons.size).T
-        if len(idx) > 0:
-            idx = np.array(idx,dtype=int)
-            neurons,Vm = neurons[idx], Vm[idx]
-        return render_to_response("d3_voltage_trace.html", {'data': Vm.tolist(), 'neurons':neurons.tolist(), 'times':times.tolist(), 
-                                        'path': path,
-                                       'project_name': project,})
+def plot_data(request, project, label):
+    record = Record.objects.get(label=label, project__id=project)
+    if record.file_exists() is True:
+        path = request.GET['path']
+        data = np.loadtxt('Data/'+path)
+        if request.GET['plot'] == 'spikes':
+            return render_to_response("d3_raster_plot.html", {'data': data.tolist(), 'neurons':range(100), 'simtime':500, 
+                                            'path': path,
+                                           'project_name': project,})
+        elif request.GET['plot'] == 'voltage':
+            idx = request.GET.getlist('idx', [])
+            neurons = np.unique(data[:,0])
+            times = np.unique(data[:,1])
+            Vm = data[:,2].reshape(-1,neurons.size).T
+            if len(idx) > 0:
+                idx = np.array(idx,dtype=int)
+                neurons,Vm = neurons[idx], Vm[idx]
+            return render_to_response("d3_voltage_trace.html", {'data': Vm.tolist(), 'neurons':neurons.tolist(), 'times':times.tolist(), 
+                                            'path': path,
+                                           'project_name': project,})
+    else:
+        raise Http404
 
 
 def download_file(request, project, label):

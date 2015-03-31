@@ -84,8 +84,8 @@
                            <td>{{file.get_metadata.mimetype|default:""}}</td>
                            <td>{{file.get_metadata.size|filesizeformat}}</td>
                             <td>View 
-                                <a target='_blank' href="/{{project_name}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
-                                <a target='_blank' href="/{{project_name}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
+                                <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
+                                <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
                             </td>
                             </tr>
                     {% endfor %}
@@ -114,8 +114,8 @@
                                 <td>{{file.get_metadata.mimetype|default:""}}</td>
                                 <td>{{file.get_metadata.size|filesizeformat}}</td>
                                 <td>View 
-                                    <a target='_blank' href="/{{project_name}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
-                                    <a target='_blank' href="/{{project_name}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
+                                    <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
+                                    <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
                                 </td></tr>
                         {% endfor %}
                 </table>
