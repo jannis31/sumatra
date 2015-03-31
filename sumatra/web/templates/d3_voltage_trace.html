@@ -1,0 +1,23 @@
+{% extends "d3_plot_base.html" %}
+
+{% load filters %}
+
+{% block title %}{{project_name}}: {{path}}{% endblock %}
+
+{% block extrahead %}
+<script type="text/javascript" src="/media/js/d3_voltage_trace.js"></script>
+{% endblock %}
+
+{% block content %}
+<script type="text/javascript">
+var data = {{ data }};
+var times = {{ times }};;
+
+draw_voltage_trace()
+</script>
+
+
+
+
+
+{% endblock %}
