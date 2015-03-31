@@ -82,7 +82,12 @@
                            <td><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}&type=input">{{file.path}}</a></td>
                            <td>{{file.digest}}</td>
                            <td>{{file.get_metadata.mimetype|default:""}}</td>
-                           <td>{{file.get_metadata.size|filesizeformat}}</td></tr>
+                           <td>{{file.get_metadata.size|filesizeformat}}</td>
+                            <td>View 
+                                <a target='_blank' href="/{{project_name}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
+                                <a target='_blank' href="/{{project_name}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
+                            </td>
+                            </tr>
                     {% endfor %}
                 </table>
                 <div id="input-comp" data-toggle="modal" href="#compareSim">compare input records</div>
@@ -107,8 +112,11 @@
                                 <td><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}">{{file.path}}</a></td>
                                 <td>{{file.digest}}</td>
                                 <td>{{file.get_metadata.mimetype|default:""}}</td>
-                                <td>{{file.get_metadata.size|filesizeformat}}</td></tr>
-                                <td><a href="plotdata?path={{file.path|urlencode}}&digest={{file.digest}}">{{file.path}}</a></td>
+                                <td>{{file.get_metadata.size|filesizeformat}}</td>
+                                <td>View 
+                                    <a target='_blank' href="/{{project_name}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
+                                    <a target='_blank' href="/{{project_name}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
+                                </td></tr>
                         {% endfor %}
                 </table>
             </div>

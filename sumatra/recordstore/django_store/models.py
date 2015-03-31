@@ -292,3 +292,6 @@ class Record(BaseModel):
 
     def working_directory(self):
         return self.launch_mode.get_parameters().get('working_directory', None)
+
+    def file_exists(self):
+        return self.to_sumatra().file_exists

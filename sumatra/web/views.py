@@ -24,6 +24,8 @@ from sumatra.commands import run, configure
 from sumatra.projects import load_project
 from sumatra.programs import Executable
 
+import numpy as np
+
 DEFAULT_MAX_DISPLAY_LENGTH = 10 * 1024
 mimetypes.init()
 
@@ -379,126 +381,25 @@ def show_file(request, project, label):
                                    'errmsg': e
                                    })
 
-def show_file(request, project, label):
-
-    record = Record.objects.get(label=unescape(label), project__id=project)
-    if request.GET.get('type', 'output') == 'output':
-        data_store = get_data_store(record.datastore.type, eval(record.datastore.parameters))
-    else:
-        data_store = get_data_store(record.input_datastore.type, eval(record.input_datastore.parameters))
+def plot_data(request, project):
     path = request.GET['path']
-    digest = request.GET['digest']
-    data_key = DataKey(path, digest)
-    mimetype, encoding = mimetypes.guess_type(path)
+    data = np.loadtxt('Data/'+path)
+    if request.GET['plot'] == 'spikes':
+        return render_to_response("d3_raster_plot.html", {'data': data.tolist(), 'neurons':range(100), 'simtime':500, 
+                                        'path': path,
+                                       'project_name': project,})
 
-    content = data_store.get_content(data_key)
-    print content
-
-
-    try:
-        if mimetype == "text/csv":
-            content = data_store.get_content(data_key, max_length=max_display_length)
-            if max_display_length is not None and len(content) >= max_display_length:
-                truncated = True
-
-                # dump the last truncated line (if any)
-                content = content.rpartition('\n')[0]
-
-            lines = content.splitlines()
-            reader = csv.reader(lines)
-
-            return render_to_response("show_csv.html",
-                                      {'path': path, 'label': label,
-                                       'digest': digest,
-                                       'project_name': project,
-                                       'reader': reader,
-                                       'truncated': truncated,
-                                       'mimetype': mimetype
-                                       })
-
-        elif encoding == 'gzip':
-            import gzip
-            with gzip.open(data_store.root + os.path.sep + path, 'r') as gf:
-                content = gf.read()
-            if 'csv' in path:
-                lines = content.splitlines()
-                if truncated:
-                    lines = [lines[0]] + lines[-min(100, len(lines)):]
-                reader = csv.reader(lines)
-                return render_to_response("show_csv.html",
-                                          {'path': path,
-                                           'label': label,
-                                           'digest': digest,
-                                           'project_name': project,
-                                           'reader': reader,
-                                           'truncated': truncated,
-                                           'mimetype': mimetype
-                                           })
-            else:
-                return render_to_response("show_file.html",
-                                          {'path': path,
-                                           'label': label,
-                                           'content': content,
-                                           'project_name': project,
-                                           'truncated': truncated,
-                                           'digest': digest,
-                                           'mimetype': mimetype
-                                           })
-        elif mimetype is None or mimetype.split("/")[0] == "text":
-            content = data_store.get_content(data_key, max_length=max_display_length)
-            if max_display_length is not None and len(content) >= max_display_length:
-                truncated = True
-            return render_to_response("show_file.html",
-                                      {'path': path,
-                                       'label': label,
-                                       'digest': digest,
-                                       'project_name': project,
-                                       'content': content,
-                                       'truncated': truncated,
-                                       'mimetype': mimetype
-                                       })
-        elif mimetype in ("image/png", "image/jpeg", "image/gif", "image/x-png"):  # need to check digests match
-            return render_to_response("show_image.html",
-                                      {'path': path,
-                                       'label': label,
-                                       'digest': digest,
-                                       'mimetype': mimetype,
-                                       'project_name': project,
-                                       'type': type})
-        elif mimetype == 'application/zip':
-            import zipfile
-            if zipfile.is_zipfile(path):
-                zf = zipfile.ZipFile(path, 'r')
-                contents = zf.namelist()
-                zf.close()
-                return render_to_response("show_file.html",
-                                          {'path': path,
-                                           'label': label,
-                                           'digest': digest,
-                                           'content': "\n".join(contents),
-                                           'project_name': project,
-                                           'mimetype': mimetype
-                                           })
-            else:
-                raise IOError("Not a valid zip file")
-        else:
-            return render_to_response("show_file.html",
-                                      {'path': path,
-                                       'label': label,
-                                       'project_name': project,
-                                       'digest': digest,
-                                       'mimetype': mimetype,
-                                       'content': "Can't display this file (mimetype assumed to be %s)" % mimetype
-                                       })
-    except (IOError, KeyError), e:
-        return render_to_response("show_file.html",
-                                  {'path': path,
-                                   'label': label,
-                                   'project_name': project,
-                                   'digest': digest,
-                                   'content': "File not found.",
-                                   'errmsg': e
-                                   })
+    elif request.GET['plot'] == 'voltage':
+        idx = request.GET.getlist('idx', [])
+        neurons = np.unique(data[:,0])
+        times = np.unique(data[:,1])
+        Vm = data[:,2].reshape(-1,neurons.size).T
+        if len(idx) > 0:
+            idx = np.array(idx,dtype=int)
+            neurons,Vm = neurons[idx], Vm[idx]
+        return render_to_response("d3_voltage_trace.html", {'data': Vm.tolist(), 'neurons':neurons.tolist(), 'times':times.tolist(), 
+                                        'path': path,
+                                       'project_name': project,})
 
 
 def download_file(request, project, label):

@@ -224,6 +224,13 @@ class Record(object):
         """
         return self.launch_mode.generate_command(self.executable, self.main_file, self.script_arguments)
 
+    @property
+    def file_exists(self):
+        if len(self.output_data) > 0:
+            return os.path.exists(os.path.join(os.getcwd(),'Data', self.output_data[0].path))
+        else:
+            return False
+
 
 class RecordDifference(object):
     """Represents the difference between two Record objects."""
