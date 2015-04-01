@@ -29,14 +29,16 @@ urlpatterns = patterns('sumatra.web.views',
                        (r'^%(project)s/%(label)s/diff' % P, 'show_diff'),
                        (r'^%(project)s/%(label)s/diff/(?P<package>[\w_]+)*$' % P, 'show_diff'),
                        (r'^%(project)s/%(label)s/plotdata$' % P, 'plot_data'),
+                       (r'^%(project)s/%(label)s/plot$' % P, 'plot_outputdata'),
                        (r'^%(project)s/simulation$' % P, 'run_sim'),
                        (r'^%(project)s/settings$' % P, 'settings'),
                        (r'^%(project)s/search$' % P, 'search'),
                        (r'^%(project)s/settags$' % P, 'set_tags'),
-                       (r'^%(project)s/plotdata$' % P, 'plot_data'),
+                       (r'^%(project)s/plot$' % P, 'plot_file'),
                        )
 
 urlpatterns += patterns('',
                         #(r'^timeline/(?P<user>\w+[\w ]*)/', Timeline.as_view()),
                         (r'^media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT, 'show_indexes': True}),
+                        (r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.STATIC_ROOT}),
                         )

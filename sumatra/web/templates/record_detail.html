@@ -86,6 +86,9 @@
                             <td>View 
                                 <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
                                 <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
+
+                                <a target='_blank' href="/{{project_name}}/plot?template=raster_plot.html&path={{file.path|urlencode}}">raster plot</a>
+                                <a target='_blank' href="/{{project_name}}/plot?template=histogram.html&path={{file.path|urlencode}}">histogram</a>
                             </td>
                             </tr>
                     {% endfor %}
@@ -116,6 +119,10 @@
                                 <td>View 
                                     <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
                                     <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
+
+                                    <a target='_blank' href="/{{project_name}}/plot?template=raster_plot.html&path={{file.path|urlencode}}">raster plot</a>
+                                    <a target='_blank' href="/{{project_name}}/plot?template=histogram.html&path={{file.path|urlencode}}">histogram</a>
+
                                 </td></tr>
                         {% endfor %}
                 </table>

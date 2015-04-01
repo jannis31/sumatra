@@ -36,8 +36,13 @@ class DjangoConfiguration(object):
             'DEBUG': True,
             'DATABASES': {},
             'INSTALLED_APPS': ('sumatra.recordstore.django_store',
+                               'django.contrib.staticfiles',
                                'django.contrib.contenttypes',  # needed for tagging
                                'tagging'),
+            'TEMPLATE_DIRS': ('./templates/',),
+            'STATICFILES_DIRS': ('./.smt/static/','./Data/'),
+            'STATIC_URL' : '/static/',
+            'STATIC_ROOT': ''
         }
         self._n_databases = 0
         self.configured = False

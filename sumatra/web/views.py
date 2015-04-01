@@ -404,6 +404,16 @@ def plot_data(request, project, label):
     else:
         raise Http404
 
+def plot_file(request, project):
+    return render_to_response(request.GET['template'], request.GET)
+
+def plot_outputdata(request, project, label):
+    record = Record.objects.get(label=label, project__id=project)
+    output_data = record.to_sumatra().output_data
+    try:
+        return HttpResponseRedirect('/project/plot?template=%s&path=%s' %(request.GET['template'], output_data[0].path))
+    except (IOError, KeyError):
+        raise Http404
 
 def download_file(request, project, label):
     label = unescape(label)
