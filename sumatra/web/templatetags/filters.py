@@ -64,3 +64,7 @@ def restructuredtext(value):
         docutils_settings = getattr(settings, "RESTRUCTUREDTEXT_FILTER_SETTINGS", {})
         parts = publish_parts(source=force_bytes(value), writer_name="html4css1", settings_overrides=docutils_settings)
         return mark_safe(force_text(parts["fragment"]))
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)

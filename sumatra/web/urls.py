@@ -35,6 +35,7 @@ urlpatterns = patterns('sumatra.web.views',
                        (r'^%(project)s/search$' % P, 'search'),
                        (r'^%(project)s/settags$' % P, 'set_tags'),
                        (r'^%(project)s/plot$' % P, 'plot_file'),
+                       (r'^%(project)s/parameters$' % P, 'list_params'),
                        )
 
 urlpatterns += patterns('',

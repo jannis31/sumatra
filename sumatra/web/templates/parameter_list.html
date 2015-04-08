@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% load filters %}
+
+{% block title %}{{project_name}}: List of parameters{% endblock %}
+
+{% block content %}
+<table>
+
+<tr>
+{% for key in keys %}
+<th>{{ key }}</th>
+{% endfor %}
+</tr>
+
+{% for record in object_list %}
+<tr>
+{% for key in keys %}
+<td>{{ record.parameters.to_sumatra.as_dict|get_item:key }}</td>
+{% endfor %}
+</tr>
+{% endfor %}
+
+</table>
+{% endblock %}
