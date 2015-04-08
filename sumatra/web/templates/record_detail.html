@@ -92,7 +92,9 @@
                             </td>
                             </tr>
                     {% endfor %}
+                    
                 </table>
+<div><a target='_blank' href="/{{project_name}}/plot?template=raster_plot.html{% for file in record.input_data.all %}&path={{file.path|urlencode}}{% endfor %}">raster plot</a><div>
                 <div id="input-comp" data-toggle="modal" href="#compareSim">compare input records</div>
                 {% else %}
                     no input files
@@ -126,6 +128,7 @@
                                 </td></tr>
                         {% endfor %}
                 </table>
+             <div><a target='_blank' href="/{{project_name}}/plot?template=raster_plot_multiple_files.html{% for file in record.output_data.all %}&path={{file.path|urlencode}}{% endfor %}">raster plot</a><div>
             </div>
         </fieldset>
     </form>
@@ -218,6 +221,10 @@ $(document).ready(function(){
     });
 
 });
+
+{% for temp in templates %}
+console.log("{{temp}}")
+{% endfor %}
 </script>
 
 {% endblock %}

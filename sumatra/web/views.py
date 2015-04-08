@@ -130,10 +130,12 @@ def record_detail(request, project, label):
     parameter_set = record.parameters.to_sumatra()
     if hasattr(parameter_set, "as_dict"):
         parameter_set = parameter_set.as_dict()
+    templates_list = [t for t in os.listdir(os.getcwd()+'/.smt/templates') if t.endswith('.html')]
     return render_to_response('record_detail.html', {'record': record,
                                                      'project_name': project,
                                                      'parameters': parameter_set,
-                                                     'form': form
+                                                     'form': form,
+                                                     'templates': templates_list
                                                      })
 
 
@@ -405,7 +407,9 @@ def plot_data(request, project, label):
         raise Http404
 
 def plot_file(request, project):
-    return render_to_response(request.GET['template'], request.GET)
+    query = request.GET.copy()
+    query['path_list'] = request.GET.getlist('path')
+    return render_to_response(request.GET['template'], query)
 
 def plot_outputdata(request, project, label):
     record = Record.objects.get(label=label, project__id=project)

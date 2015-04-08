@@ -126,7 +126,7 @@ class GitWorkingCopy(WorkingCopy):
                     if blob.name == main_file:
                         file_content = blob.data_stream.read()
                         return file_content
-        return file_content
+                return file_content
 
     def contains(self, path):
         """Does the repository contain the file with the given path?"""
