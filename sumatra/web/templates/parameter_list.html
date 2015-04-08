@@ -4,10 +4,28 @@
 
 {% block title %}{{project_name}}: List of parameters{% endblock %}
 
+{% block extrahead %}
+<style type="text/css">
+th,td {
+min-width: 100px;
+padding-left: 10px;
+padding-right: 10px;
+border-left: 1px solid #ccc;
+border-right: 1px solid #ccc;
+}
+</style>
+
+
+{% endblock %}
+
+
 {% block content %}
 <table>
 
 <tr>
+<th>Label</th><th>Version</th>
+
+
 {% for key in keys %}
 <th>{{ key }}</th>
 {% endfor %}
@@ -15,6 +33,8 @@
 
 {% for record in object_list %}
 <tr>
+<td>{{ record.label }}</td><td>{{ record.version|cut:"vers" }}</td>
+
 {% for key in keys %}
 <td>{{ record.parameters.to_sumatra.as_dict|get_item:key }}</td>
 {% endfor %}
