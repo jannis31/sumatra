@@ -2,10 +2,9 @@
 
 {% load filters %}
 
-{% block title %}{{project_name}}{{ main_file }}: List of parameters{% endblock %}
+{% block title %}{{project_name}}: List of parameters{% endblock %}
 
 {% block extrahead %}
-<link rel="stylesheet" href='/media/css/jquery.dataTables.css'>
 <style type="text/css">
 th,td {
 min-width: 100px;
@@ -14,73 +13,33 @@ padding-right: 10px;
 border-left: 1px solid #ccc;
 border-right: 1px solid #ccc;
 }
-
-tfoot input {
-        width: 100%;
-        padding: 3px;
-        box-sizing: border-box;
-    }
 </style>
 
-<script type="text/javascript" src="/media/js/jquery.dataTables.min.js"></script>
-<script type="text/javascript">
-$(document).ready(function() {
-    // Setup - add a text input to each footer cell
-    $('#param_table tfoot th').each( function () {
-        var title = $('#example thead th').eq( $(this).index() ).text();
-        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
-    } );
 
-    // DataTable
-    var table = $('#param_table').DataTable();
- 
-    // Apply the search
-    table.columns().every( function () {
-        var that = this;
- 
-        $( 'input', this.footer() ).on( 'keyup change', function () {
-            that
-                .search( this.value )
-                .draw();
-        } );
-    } );
-} );
-</script>
 {% endblock %}
 
 
 {% block content %}
-<table id="param_table" class="display" width="100%" cellspacing="0">
+<table>
 
-<thead>
 <tr>
-<th>Date</th><th>Label</th><th>Version</th>
+<th>Label</th><th>Version</th>
+
+
 {% for key in keys %}
 <th>{{ key }}</th>
 {% endfor %}
 </tr>
-</thead>
 
-<tfoot>
-<tr>
-<th>Date</th><th>Label</th><th>Version</th>
-{% for key in keys %}
-<th>{{ key }}</th>
-{% endfor %}
-</tr>
-</tfoot>
-
-<tbody>
 {% for record in object_list %}
 <tr>
-<td>{{ record.timestamp }}</td><td>{{ record.label }}</td><td>{{ record.version|cut:"vers" }}</td>
+<td>{{ record.label }}</td><td>{{ record.version|cut:"vers" }}</td>
 
 {% for key in keys %}
 <td>{{ record.parameters.to_sumatra.as_dict|get_item:key }}</td>
 {% endfor %}
 </tr>
 {% endfor %}
-</tbody>
 
 </table>
 {% endblock %}

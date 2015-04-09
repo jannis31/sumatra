@@ -92,15 +92,6 @@ class TextFormatter(Formatter):
         tt = TextTable(fields, self.records)
         return str(tt)
 
-    def params(self):
-        """
-        Return information about a list of records as text, in a simple
-        tabular format.
-        """
-        tt = ParamsTable(self.records, seperator='|')
-        return str(tt)
-
-
 
 class TextTable(object):
     """
@@ -109,11 +100,10 @@ class TextTable(object):
     but for now I'd like to avoid too many dependencies.
     """
 
-    def __init__(self, headers, rows, max_column_width=20, seperator='|'):
+    def __init__(self, headers, rows, max_column_width=20):
         self.headers = headers
         self.rows = rows
         self.max_column_width = max_column_width
-        self.seperator = seperator
 
     def calculate_column_widths(self):
         column_widths = []
@@ -124,57 +114,12 @@ class TextTable(object):
 
     def __str__(self):
         column_widths = self.calculate_column_widths()
-        if self.seperator == '|':
-            format = "| " + " | ".join("%%-%ds" % w for w in column_widths) + " |\n"
-        else:
-            format = self.seperator.join(len(column_widths)*["%s"]) + "\n"
+        format = "| " + " | ".join("%%-%ds" % w for w in column_widths) + " |\n"
         assert len(column_widths) == len(self.headers)
         output = format % tuple(h.title() for h in self.headers)
         for row in self.rows:
             output += format % tuple(str(getattr(row, header))[:self.max_column_width] for header in self.headers)
         return output
-
-class ParamsTable(object):
-    """
-    Very primitive implementation of a text table. There are more sophisticated
-    implementations around, e.g. http://pypi.python.org/pypi/texttable/0.6.0/
-    but for now I'd like to avoid too many dependencies.
-    """
-
-    def __init__(self, rows, max_column_width=20, seperator='|'):
-        self.rows = rows
-        self.headers = self.get_headers()
-        self.max_column_width = max_column_width
-        self.seperator = seperator
-
-    def get_headers(self):
-        headers = []
-        for row in self.rows:
-            for key in row.parameters.as_dict().keys():
-                if key not in headers:
-                    headers.append(key)
-        return headers
-
-    def calculate_column_widths(self):
-        column_widths = []
-        for header in self.headers:
-            column_width = max([len(header)] + [len(str(row.parameters.as_dict()[header])) for row in self.rows])
-            column_widths.append(min(self.max_column_width, column_width))
-        return column_widths
-
-    def __str__(self):
-        column_widths = self.calculate_column_widths()
-        if self.seperator == '|':
-            format = "| " + " | ".join("%%-%ds" % w for w in column_widths) + " |\n"
-        else:
-            format = self.seperator.join(len(column_widths)*["%s"]) + "\n"
-        assert len(column_widths) == len(self.headers)
-        output = format % tuple(h for h in self.headers)
-        for row in self.rows:
-            params = row.parameters.as_dict()
-            output += format % tuple(str(params[header])[:self.max_column_width] for header in self.headers)
-        return output
-
 
 
 class ShellFormatter(Formatter):
@@ -342,67 +287,6 @@ class LaTeXFormatter(Formatter):
                                paper_size='a4paper')
 
 
-class CSVFormatter(Formatter):
-    """
-    Format the information from a list of Sumatra records as text.
-    """
-
-    def short(self):
-        """Return a list of record labels, one per line."""
-        return ";".join(record.label for record in self.records)
-
-    def long(self):
-        """
-        Return information about a list of records as text, in a simple
-        tabular format.
-        """
-        tt = TextTable(fields, self.records, seperator=';')
-        return str(tt)
-
-    def table(self):
-        # perhaps have all the comments in the long version but not the short one
-        return self.long()
-
-    def params(self):
-        """
-        Return information about a list of records as text, in a simple
-        tabular format.
-        """
-        tt = ParamsTable(self.records, seperator=';')
-        return str(tt)
-
-
-class TSVFormatter(Formatter):
-    """
-    Format the information from a list of Sumatra records as text.
-    """
-
-    def short(self):
-        """Return a list of record labels, one per line."""
-        return "\t".join(record.label for record in self.records)
-
-    def long(self):
-        """
-        Return information about a list of records as text, in a simple
-        tabular format.
-        """
-        tt = TextTable(fields, self.records, seperator='\t')
-        return str(tt)
-
-    def table(self):
-        # perhaps have all the comments in the long version but not the short one
-        return self.long()
-
-    def params(self):
-        """
-        Return information about a list of records as text, in a simple
-        tabular format.
-        """
-        tt = ParamsTable(self.records, seperator='\t')
-        return str(tt)
-
-
-
 class TextDiffFormatter(Formatter):
 
     """
@@ -516,10 +400,7 @@ formatters = {
     'html': HTMLFormatter,
     'latex': LaTeXFormatter,
     'shell': ShellFormatter,
-    'csv': CSVFormatter,
-    'tsv': TSVFormatter,
     'textdiff': TextDiffFormatter,
-
 }
 
 

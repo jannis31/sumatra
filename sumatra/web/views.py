@@ -420,15 +420,12 @@ def plot_outputdata(request, project, label):
         raise Http404
 
 def list_params(request, project):
-    if 'main_file' in request.GET:
-        main_file = request.GET['main_file']
-        if 'version' in request.GET:
-            version = request.GET['version']
-            object_list = Record.objects.filter(project__id=project, main_file=main_file, version__startswith=version)
-        else:
-            object_list = Record.objects.filter(project__id=project, main_file=main_file)
-        keys = np.array(map(lambda x: x.parameters.to_sumatra().as_dict().keys(), object_list)).T
-        return render_to_response('parameter_list.html',{'object_list':object_list, 'keys': np.unique(keys), 'main_file':main_file})
+    if 'version' in request.GET:
+        object_list = Record.objects.filter(project__id=project, main_file=request.GET['main_file'], version__startswith=request.GET['version'])
+    else:
+        object_list = Record.objects.filter(project__id=project, main_file=request.GET['main_file'])
+    keys = np.array(map(lambda x: x.parameters.to_sumatra().as_dict().keys(), object_list)).T
+    return render_to_response('parameter_list.html',{'object_list':object_list, 'keys': np.unique(keys)})
 
 def download_file(request, project, label):
     label = unescape(label)
