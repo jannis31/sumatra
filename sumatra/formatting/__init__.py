@@ -93,7 +93,12 @@ class TextFormatter(Formatter):
         tt = TextTable(fields, self.records)
         return str(tt)
 
-    def params(self):
+    def params_show(self):
+        """ Return parameter information about a list of records as text, in a simple tabular format."""
+        tt = ParamsTable(self.records, seperator='|')
+        return str(tt)
+
+    def params_filter(self):
         """ Return parameter information about a list of records as text, in a simple tabular format."""
         tt = ParamsTable(self.records, seperator='|')
         return str(tt)
@@ -369,7 +374,7 @@ class CSVFormatter(Formatter):
         # perhaps have all the comments in the long version but not the short one
         return self.long()
 
-    def params(self):
+    def params_show(self):
         """
         Return information about a list of records as text, in a simple
         tabular format.
@@ -408,7 +413,7 @@ class TSVFormatter(Formatter):
         # perhaps have all the comments in the long version but not the short one
         return self.long()
 
-    def params(self):
+    def params_show(self):
         """
         Return information about a list of records as text, in a simple
         tabular format.

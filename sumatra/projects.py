@@ -268,8 +268,11 @@ class Project(object):
         self._most_recent = self.record_store.most_recent(self.name)
         return n
 
-    def format_records(self, format='text', mode='short', tags=None, reverse=False, keyword=None, *args, **kwargs):
+    def format_records(self, format='text', mode='short', tags=None, reverse=False, params_filter=None, keyword=None, *args, **kwargs):
         records = self.record_store.list(self.name, tags, *args, **kwargs)
+        if params_filter is not None:
+            k,v = params_filter.split('=')
+            records = [record for record in records if str(record.parameters.as_dict()[k]) == v]
         if reverse:
             records.reverse()
         formatter = get_formatter(format)(records, project=self, tags=tags)
