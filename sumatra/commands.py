@@ -391,23 +391,29 @@ def list(argv):  # add 'report' and 'log' as aliases
                         dest="mode", help="prints information in tab-separated columns")
     parser.add_argument('-p', '--params', action="store_const", const="params",
                         dest="mode", help="prints parameter information in columns")
+    parser.add_argument('-o', '--output_files', action="store_const", const="output_files",
+                        dest="mode", help="prints output files")
+    parser.add_argument('-k', '--keyword', metavar='KW', default=None,  help="KW can be 'label' or others")
     parser.add_argument('-f', '--format', metavar='FMT', choices=['text', 'html', 'latex', 'shell', 'tsv', 'csv'], default='text',
                         help="FMT can be 'text' (default), 'html', 'latex', 'shell' 'csv' or 'tsv'.")
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
                         help="list records in reverse order (default: newest first)")
-    parser.add_argument('-m', '--main', help="the name of the script that would be supplied on the command line if running the simulation/analysis normally, e.g. init.hoc. If not specified, the project's default will be used.")
+    parser.add_argument('-m', '--main', help="the name of the script for filtering list of records.")
     parser.add_argument('-v', '--version', metavar='REV',
-                        help="use version REV of the code (if this is not the same as the working copy, it will be checked out of the repository). If this option is not specified, the most recent version in the repository will be used. If there are changes in the working copy, the user will be prompted to commit them first")
+                        help="use version REV of the code. The first 5 characters is sufficent for filtering list of records.")
     args = parser.parse_args(argv)
+
+    if args.keyword is not None:
+        args.mode = 'keyword'
 
     project = load_project()
     if args.main is not None:
         if args.version is not None:
-            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, main_file=args.main, version__startswith=args.version))
+            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, keyword=args.keyword, main_file=args.main, version__startswith=args.version))
         else:
-            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, main_file=args.main))
+            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, keyword=args.keyword, main_file=args.main))
     else:
-        print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse))
+        print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, keyword=args.keyword))
 
 
 def delete(argv):

@@ -11,6 +11,7 @@ formats: currently text or HTML.
 import textwrap
 import cgi
 import re
+import operator
 
 fields = ['label', 'timestamp', 'reason', 'outcome', 'duration', 'repository',
           'main_file', 'version', 'script_arguments', 'executable',
@@ -25,12 +26,12 @@ class Formatter(object):
         self.project = project
         self.tags = None
 
-    def format(self, mode='short'):
+    def format(self, mode='short', keyword=None):
         """
         Format a record according to the given mode. ``mode`` may be 'short',
         'long' or 'table'.
         """
-        return getattr(self, mode)()
+        return getattr(self, mode)
 
 
 class TextFormatter(Formatter):
@@ -93,13 +94,18 @@ class TextFormatter(Formatter):
         return str(tt)
 
     def params(self):
-        """
-        Return information about a list of records as text, in a simple
-        tabular format.
-        """
+        """ Return parameter information about a list of records as text, in a simple tabular format."""
         tt = ParamsTable(self.records, seperator='|')
         return str(tt)
 
+    def keyword(self, keyword=None):
+        """Return a list of record labels plus one content of the record, one per line."""
+        return "\n".join("%s\t%s" %(record.label, str(getattr(record, keyword))) for record in self.records if hasattr(record, keyword))
+
+    def output_files(self):
+        """Return a list of record files, one per line."""
+        a = [[f.path for f in r.output_data] for r in self.records]
+        return '\n'.join(reduce(operator.add, a))
 
 
 class TextTable(object):
@@ -133,6 +139,7 @@ class TextTable(object):
         for row in self.rows:
             output += format % tuple(str(getattr(row, header))[:self.max_column_width] for header in self.headers)
         return output
+
 
 class ParamsTable(object):
     """
@@ -174,7 +181,6 @@ class ParamsTable(object):
             params = row.parameters.as_dict()
             output += format % tuple(str(params[header])[:self.max_column_width] for header in self.headers)
         return output
-
 
 
 class ShellFormatter(Formatter):
@@ -371,6 +377,15 @@ class CSVFormatter(Formatter):
         tt = ParamsTable(self.records, seperator=';')
         return str(tt)
 
+    def filter(self, keyword=None):
+        """Return a list of record value, one per line."""
+        return ";".join(str(getattr(record, keyword)) for record in self.records)
+
+    def output_files(self):
+        """Return a list of record files, one per line."""
+        a = [[f.path for f in r.output_data] for r in self.records]
+        return ";".join(reduce(operator.add, a))
+
 
 class TSVFormatter(Formatter):
     """
@@ -401,6 +416,14 @@ class TSVFormatter(Formatter):
         tt = ParamsTable(self.records, seperator='\t')
         return str(tt)
 
+    def filter(self, keyword=None):
+        """Return a list of record value, one per line."""
+        return "\t".join(str(getattr(record, keyword)) for record in self.records)
+
+    def output_files(self):
+        """Return a list of record files, one per line."""
+        a = [[f.path for f in r.output_data] for r in self.records]
+        return "\t".join(reduce(operator.add, a))
 
 
 class TextDiffFormatter(Formatter):
