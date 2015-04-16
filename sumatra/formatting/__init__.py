@@ -188,7 +188,6 @@ class ParamsTable(object):
             format = self.seperator.join(len(column_widths)*["%s"]) + "\n"
         assert len(column_widths) == len(self.headers)
         output = format % tuple(h for h in self.headers)
-        print self.headers
         for row in self.rows:
             params = row.parameters
             if hasattr(params, 'as_dict'):
