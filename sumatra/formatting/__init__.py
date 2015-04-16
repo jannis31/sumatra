@@ -95,7 +95,7 @@ class TextFormatter(Formatter):
 
     def params_show(self):
         """ Return parameter information about a list of records as text, in a simple tabular format."""
-        tt = ParamsTable(self.records, seperator='|')
+        tt = ParamsTable(self.records, max_column_width=13, seperator='|')
         return str(tt)
 
 #    def params_filter(self):
@@ -153,7 +153,7 @@ class ParamsTable(object):
     but for now I'd like to avoid too many dependencies.
     """
 
-    def __init__(self, rows, max_column_width=13, seperator='|'):
+    def __init__(self, rows, max_column_width=20, seperator='|'):
         self.rows = rows
         self.headers = self.get_headers()
         self.max_column_width = max_column_width
@@ -389,7 +389,7 @@ class CSVFormatter(Formatter):
         Return information about a list of records as text, in a simple
         tabular format.
         """
-        tt = ParamsTable(self.records, seperator=';')
+        tt = ParamsTable(self.records, max_column_width=30, seperator=';')
         return str(tt)
 
 #    def filter(self, keyword=None):
@@ -428,7 +428,7 @@ class TSVFormatter(Formatter):
         Return information about a list of records as text, in a simple
         tabular format.
         """
-        tt = ParamsTable(self.records, seperator='\t')
+        tt = ParamsTable(self.records, max_column_width=30, seperator='\t')
         return str(tt)
 
 #    def filter(self, keyword=None):
