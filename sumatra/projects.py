@@ -272,7 +272,7 @@ class Project(object):
         records = self.record_store.list(self.name, tags, *args, **kwargs)
         if params_filter is not None:
             k,v = params_filter.split('=')
-            records = [record for record in records if str(record.parameters.as_dict()[k]) == v]
+            records = [record for record in records if str(record.parameters.as_dict().get(k)) == v]
         if reverse:
             records.reverse()
         formatter = get_formatter(format)(records, project=self, tags=tags)
