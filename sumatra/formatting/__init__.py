@@ -98,10 +98,10 @@ class TextFormatter(Formatter):
         tt = ParamsTable(self.records, seperator='|')
         return str(tt)
 
-    def params_filter(self):
-        """ Return parameter information about a list of records as text, in a simple tabular format."""
-        tt = ParamsTable(self.records, seperator='|')
-        return str(tt)
+#    def params_filter(self):
+#        """ Return parameter information about a list of records as text, in a simple tabular format."""
+#        tt = ParamsTable(self.records, seperator='|')
+#        return str(tt)
 
     def keyword(self, keyword=None):
         """Return a list of record labels plus one content of the record, one per line."""
@@ -153,16 +153,19 @@ class ParamsTable(object):
     but for now I'd like to avoid too many dependencies.
     """
 
-    def __init__(self, rows, max_column_width=20, seperator='|'):
+    def __init__(self, rows, max_column_width=13, seperator='|'):
         self.rows = rows
         self.headers = self.get_headers()
         self.max_column_width = max_column_width
         self.seperator = seperator
 
     def get_headers(self):
-        headers = []
+        headers = [u'label',u'version',u'main_file']
         for row in self.rows:
-            for key in row.parameters.as_dict().keys():
+            params = row.parameters
+            if hasattr(params, 'as_dict'):
+                params = params.as_dict()
+            for key in params.keys():
                 if key not in headers:
                     headers.append(key)
         return headers
@@ -170,7 +173,10 @@ class ParamsTable(object):
     def calculate_column_widths(self):
         column_widths = []
         for header in self.headers:
-            column_width = max([len(header)] + [len(str(row.parameters.as_dict()[header])) for row in self.rows])
+            if header in [u'label', u'version',u'main_file']:
+                column_width =max([len(header)] + [len(str(getattr(row, header))) for row in self.rows])
+            else:
+                column_width = max([len(header)] + [len(str(row.parameters.get(header))) for row in self.rows])
             column_widths.append(min(self.max_column_width, column_width))
         return column_widths
 
@@ -182,9 +188,14 @@ class ParamsTable(object):
             format = self.seperator.join(len(column_widths)*["%s"]) + "\n"
         assert len(column_widths) == len(self.headers)
         output = format % tuple(h for h in self.headers)
+        print self.headers
         for row in self.rows:
-            params = row.parameters.as_dict()
-            output += format % tuple(str(params[header])[:self.max_column_width] for header in self.headers)
+            params = row.parameters
+            if hasattr(params, 'as_dict'):
+                params = params.as_dict()
+            output += format % tuple(
+                [str(getattr(row, header))[:self.max_column_width] for header in self.headers[:3]]
+               +[str(params.get(header,''))[:self.max_column_width] for header in self.headers[3:]])
         return output
 
 
@@ -382,9 +393,9 @@ class CSVFormatter(Formatter):
         tt = ParamsTable(self.records, seperator=';')
         return str(tt)
 
-    def filter(self, keyword=None):
-        """Return a list of record value, one per line."""
-        return ";".join(str(getattr(record, keyword)) for record in self.records)
+#    def filter(self, keyword=None):
+#        """Return a list of record value, one per line."""
+#        return ";".join(str(getattr(record, keyword)) for record in self.records)
 
     def output_files(self):
         """Return a list of record files, one per line."""
@@ -421,9 +432,9 @@ class TSVFormatter(Formatter):
         tt = ParamsTable(self.records, seperator='\t')
         return str(tt)
 
-    def filter(self, keyword=None):
-        """Return a list of record value, one per line."""
-        return "\t".join(str(getattr(record, keyword)) for record in self.records)
+#    def filter(self, keyword=None):
+#        """Return a list of record value, one per line."""
+#        return "\t".join(str(getattr(record, keyword)) for record in self.records)
 
     def output_files(self):
         """Return a list of record files, one per line."""

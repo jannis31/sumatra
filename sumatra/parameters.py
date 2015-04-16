@@ -90,6 +90,12 @@ class YAMLParameterSet(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def get(self, kw, default=None):
+        if kw in self.values:
+            return self.values[kw]
+        else:
+            return default
+
     def pretty(self, expand_urls=False):
         """
         Return a string representation of the parameter set, suitable for
@@ -191,6 +197,12 @@ class SimpleParameterSet(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def get(self, kw, default=None):
+        if kw in self.values:
+            return self.values[kw]
+        else:
+            return default
 
     def pop(self, k, d=POP_NONE):
         if k in self.values:
@@ -298,6 +310,12 @@ class ConfigParserParameterSet(SafeConfigParser):
         # implement this simple version which avoids copying SRE_Pattern objects
         return ConfigParserParameterSet(self.pretty())
 
+    def get(self, kw, default=None):
+        if kw in self.as_dict():
+            return self.as_dict()[kw]
+        else:
+            return default
+
     def pretty(self, expand_urls=False):
         """
         Return a string representation of the parameter set, suitable for
@@ -400,6 +418,12 @@ class JSONParameterSet(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
+
+    def get(self, kw, default=None):
+        if kw in self.values:
+            return self.values[kw]
+        else:
+            return default
 
     def pretty(self, expand_urls=False):
         """

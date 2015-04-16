@@ -410,9 +410,9 @@ def list(argv):  # add 'report' and 'log' as aliases
     project = load_project()
     if args.main_file is not None:
         if args.version is not None:
-            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, params_filter=args.params_filter, keyword=args.keyword, main_file=args.main_file, version__startswith=args.version))
+            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, params_filter=args.params_filter, keyword=args.keyword, main_file__startswith=args.main_file, version__startswith=args.version))
         else:
-            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, params_filter=args.params_filter, keyword=args.keyword, main_file=args.main_file))
+            print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, params_filter=args.params_filter, keyword=args.keyword, main_file__startswith=args.main_file))
     else:
         print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse, params_filter=args.params_filter, keyword=args.keyword))
 
