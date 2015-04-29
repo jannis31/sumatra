@@ -70,5 +70,13 @@ $(function() {
             var el = $('#alist-labels').children()[i]; // not the best way
             $(el).addClass('label-success');
         }
-    });    
+    });
+
+    //click on the 'compare records' button
+    $('#d-viewParams').live('click', function(){
+        var main_file = $('.record.ui-selected').find('#main-t a').html();
+        window.open('./parameters?main_file='+main_file, '_blank');
+    });
+
+
 });

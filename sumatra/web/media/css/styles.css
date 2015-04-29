@@ -892,7 +892,7 @@ h2.topic{
     cursor: pointer; 
 }
 
-#l-ename, #l-eversion, #l-main{
+#l-ename, #l-eversion, #l-main, #l-inputfile, #l-outputfile {
   margin-top: 0px;
 }
 
@@ -1103,7 +1103,7 @@ div.headercode{
   position:relative;
 }
 
-#d-delete, #d-tags, #d-comp{
+#d-delete, #d-tags, #d-comp, #d-viewParams{
   float:left;
   position:relative;
   margin-left: 30px;

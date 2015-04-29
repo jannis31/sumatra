@@ -7,6 +7,10 @@
 {% block extrahead %}
 <link rel="stylesheet" href='/media/css/jquery.dataTables.css'>
 <style type="text/css">
+#pageBody {
+    margin: 0 20px;
+}
+
 th,td {
 min-width: 100px;
 padding-left: 10px;
@@ -37,17 +41,29 @@ $(document).ready(function() {
     // Apply the search
     table.columns().every( function () {
         var that = this;
- 
         $( 'input', this.footer() ).on( 'keyup change', function () {
-            that
-                .search( this.value )
-                .draw();
+            that.search( this.value ).draw();
         } );
     } );
 } );
 </script>
 {% endblock %}
 
+{% block header %}
+<li class="divider"></li>
+<li><a href="/{{project_name}}/">{{project_name}}</a></li>
+<li class="dropdown">
+  <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+    {{main_file}}
+    <span class="caret"></span>
+  </a>
+<ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+{% for mainfile in  project.get_mainfiles %}
+  <li><a tabindex="-1" href="/{{project_name}}/parameters?main_file={{mainfile}}">{{mainfile}}</a></li>
+{% endfor %}
+</ul>
+</li>
+{% endblock %}
 
 {% block content %}
 <table id="param_table" class="display" width="100%" cellspacing="0">
@@ -73,7 +89,7 @@ $(document).ready(function() {
 <tbody>
 {% for record in object_list %}
 <tr>
-<td>{{ record.timestamp }}</td><td>{{ record.label }}</td><td>{{ record.version|cut:"vers" }}</td>
+<td>{{ record.timestamp }}</td><td><a href='/{{project_name}}/{{record.label}}/' target='_blank'>{{ record.label }}</a></td><td>{{ record.version|cut:"vers" }}</td>
 
 {% for key in keys %}
 <td>{{ record.parameters.to_sumatra.as_dict|get_item:key }}</td>
