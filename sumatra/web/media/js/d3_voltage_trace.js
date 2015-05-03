@@ -1,8 +1,8 @@
 function draw_voltage_trace() {
 
-    var margin = {top: 20, right: 80, bottom: 30, left: 50},
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
         width = 960 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+        height = 500 - margin.top - margin.bottom;
 
     var xScale = d3.scale.linear().range([0, width]).domain([0, d3.max(times)]),
         yScale = d3.scale.linear().range([height, 0]).domain([d3.min(d3.merge(data)), d3.max(d3.merge(data))]);
@@ -42,21 +42,21 @@ function draw_voltage_trace() {
             .style("stroke", color[i % 10] );
     }
 
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis)
-      .append("svg:text")
+    svg.append("svg:text")
+        .attr("class", "title")
+        .attr("x", width/2-margin.left)
+        .attr("y", -10)
+        .text("Voltage trace");
+
+    svg.append("svg:text")
         .attr("class", "x label")
         .attr("text-anchor", "middle")
         .attr("x", width/2)
-        .attr("y", height+margin.bottom-5)
+        .attr("y", height+margin.bottom-12)
+        .attr("dy", ".75em")
         .text("Time (ms)");
 
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-      .append("svg:text")
+    svg.append("svg:text")
         .attr("class", "y label")
         .attr("text-anchor", "middle")
         .attr("x", -height/2)
@@ -64,6 +64,15 @@ function draw_voltage_trace() {
         .attr("dy", ".75em")
         .attr("transform", "rotate(-90)")
         .text("Membrane potential (mV)");
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis);
 
     function zoomed() {
         svg.select(".x.axis").call(xAxis);

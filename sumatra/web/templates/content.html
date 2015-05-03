@@ -119,8 +119,8 @@
         <div class='row-item' id='main-t'><a class='id-script' data-toggle="modal" href="#">{{record.main_file}}</a></div>
         <div class='row-item' id='version-t'><span class="span-box">{{record.version|cut:"vers"}}{% if record.diff %}*{% endif %}</span></div>
         <div class='row-item' id='arguments-t'><a class='href_args' href='#' title="{{record.script_arguments}}">{{record.script_arguments|truncatechars:20}}</a></div>
-        <div class='row-item' id='inputfile-t' title="{% for file in record.input_data.all %}{{file.path}} {% endfor%}"> {{ record.input_data.all|length }} {% for file in record.input_data.all %}{{file.get_metadata.mimetype|default:""}}{% endfor%}</div>
-        <div class='row-item' id='outputfile-t' title="{% for file in record.output_data.all %}{{file.path}} {% endfor%}"> {{ record.output_data.all|length }} {% for file in record.output_data.all %}{{file.get_metadata.mimetype|default:""}}{% endfor%}</div>
+        <div class='row-item' id='inputfile-t' title="{% for file in record.input_data.all %}{{file.path}} {% endfor%}"> {{ record.input_data.all|length }}{% if not record.input_file_exists %}*{% endif %} {% for file in record.input_data.all %}{{file.get_metadata.mimetype|default:""}}{% endfor%}</div>
+        <div class='row-item' id='outputfile-t' title="{% for file in record.output_data.all %}{{file.path}} {% endfor%}"> {{ record.output_data.all|length }}{% if not record.output_file_exists %}*{% endif %} {% for file in record.output_data.all %}{{file.get_metadata.mimetype|default:""}}{% endfor%}</div>
         <br>
       </li>
     {% endfor %}

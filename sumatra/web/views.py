@@ -135,7 +135,7 @@ def record_detail(request, project, label):
                                                      'project_name': project,
                                                      'parameters': parameter_set,
                                                      'form': form,
-                                                     'templates': templates_list
+                                                     'templates': templates_list,
                                                      })
 
 
@@ -385,9 +385,12 @@ def show_file(request, project, label):
 
 def plot_data(request, project, label):
     record = Record.objects.get(label=label, project__id=project)
-    if record.file_exists() is True:
-        path = request.GET['path']
-        data = np.loadtxt('Data/'+path)
+    if record.output_file_exists() is True:
+        pathlist = request.GET.getlist('path')
+        data = []
+        for path in pathlist:
+            data.extend(np.loadtxt('Data/'+path))
+        data = np.array(data)
         if request.GET['plot'] == 'spikes':
             return render_to_response("d3_raster_plot.html", {'data': data.tolist(), 'neurons':range(100), 'simtime':500, 
                                             'path': path,

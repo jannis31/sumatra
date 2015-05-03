@@ -42,7 +42,8 @@ $(function() {
     // clicking on the arguments link
     $('.href_lab').on('click', function(e){
         e.stopPropagation();
-        $(this).attr('href', window.location.pathname + $(this).html() + '/');
+//        $(this).attr('href', window.location.pathname + $(this).html() + '/');
+        window.open(window.location.pathname + $(this).html() + '/', '_blank');
     });
 
     // clicking on the tag name

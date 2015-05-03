@@ -1,8 +1,8 @@
 function draw_raster_plot() {
 
-    var margin = {top: 20, right: 80, bottom: 30, left: 50},
+    var margin = {top: 20, right: 20, bottom: 30, left: 50},
         width = 960 - margin.left - margin.right,
-        height = 400 - margin.top - margin.bottom;
+        height = 500 - margin.top - margin.bottom;
 
     var xScale = d3.scale.linear()
         .domain([0, simtime])
@@ -30,9 +30,17 @@ function draw_raster_plot() {
 
     svg.append("svg:text")
         .attr("class", "title")
-        .attr("x", width/2)
-        .attr("y", 0)
+        .attr("x", width/2-margin.left)
+        .attr("y", -10)
         .text("Raster plot");
+
+    svg.append("svg:text")
+        .attr("class", "x label")
+        .attr("text-anchor", "middle")
+        .attr("x", width/2)
+        .attr("y", height+margin.bottom-12)
+        .attr("dy", ".75em")
+        .text("Time (ms)");
 
     svg.append("svg:text")
         .attr("class", "y label")
@@ -43,21 +51,13 @@ function draw_raster_plot() {
         .attr("transform", "rotate(-90)")
         .text(neurons.length > 3 ? "Neuron ID": "ID");
 
-    svg.append("svg:text")
-        .attr("class", "x label")
-        .attr("text-anchor", "middle")
-        .attr("x", width/2)
-        .attr("y", height+margin.bottom-5)
-        .attr("dy", ".75em")
-        .text("Time (ms)");
-
     svg.append("g")
-        .attr("class", "axis")
-        .attr("transform", "translate(0," + (height) + ")")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
         .call(xAxis);
 
     svg.append("g")
-        .attr("class", "axis")
+        .attr("class", "y axis")
         .call(yAxis);
 
     svg.selectAll("circle")
@@ -65,6 +65,6 @@ function draw_raster_plot() {
       .enter().append("svg:circle")
         .attr("cx", function(d) { return xScale(d[1]); })
         .attr("cy", function(d) { return yScale(d[0]); })
-        .attr("r", 1.);
+        .attr("r", 1);
 }
 

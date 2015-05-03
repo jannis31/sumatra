@@ -2,7 +2,7 @@
 
 {% load filters %}
 
-{% block title %}{{project_name}}: {{record.label}}{% endblock %}
+{% block title %}{{record.label}}{% endblock %}
 
 {% block header %}
             <li class="divider"></li>
@@ -70,31 +70,51 @@
         <fieldset class = 'field-acc'>
             <div class="control-group">
                 {% if record.input_data.count %}
-                <table>
+                <table style="width:100%">
                     <tr><td colspan="4">{{record.input_datastore.access_parameters.root}}</td></tr>
                     <tr><td>Record</td><td colspan="3">File</td></tr>
 
                     {% for file in record.input_data.all %}
                            <tr class="{% cycle odd even %} record ui-selected">
-                            {% if file.get_record %}
-                           <td id="label-t"><a id="{{file.get_record.label}}" class="input_label" href="/{{project_name}}/{{file.get_record.label}}/" title="{{file.get_record.parameters.to_sumatra}}">{{file.get_record.label|urlencode}}</a></td>
+                           <td id="label-t">
+                            {% if file.get_record %}<a id="{{file.get_record.label}}" class="input_label" href="/{{project_name}}/{{file.get_record.label}}/" title="{{file.get_record.parameters.to_sumatra}}">{{file.get_record.label|urlencode}}</a>
                             {% endif %}
+                            </td>
+
                            <td><a href="datafile?path={{file.path|urlencode}}&digest={{file.digest}}&type=input">{{file.path}}</a></td>
                            <td>{{file.digest}}</td>
                            <td>{{file.get_metadata.mimetype|default:""}}</td>
                            <td>{{file.get_metadata.size|filesizeformat}}</td>
-                            <td>View 
-                                <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
-                                <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
-
-                                <a target='_blank' href="/{{project_name}}/plot?template=raster_plot.html&path={{file.path|urlencode}}">raster plot</a>
-                                <a target='_blank' href="/{{project_name}}/plot?template=histogram.html&path={{file.path|urlencode}}">histogram</a>
-                            </td>
+                            <td><input type='checkbox' name='{{file.path|urlencode}}' class='files' label='{{record.label}}' digest='{{file.digest}}'></input></td>
                             </tr>
                     {% endfor %}
                     
                 </table>
-<div><a target='_blank' href="/{{project_name}}/plot?template=raster_plot.html{% for file in record.input_data.all %}&path={{file.path|urlencode}}{% endfor %}">raster plot</a><div>
+
+
+                <div class="btn-group">
+                  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    Plot from your template
+                    <span class="caret"></span>
+                  </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    {% for template in templates %}
+                      <li><a class="plot_template" tabindex="-1" href="#" id="{{template}}">{{template}}</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="btn-group">
+                  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    Plot from default template
+                    <span class="caret"></span>
+                  </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                         <li><a class="plot_default_template" href="#" id="spikes" >spikes</a></li>
+                         <li><a class="plot_default_template" href="#" id="voltage" >voltage</a></li>
+                    </ul>
+                </div>
+
                 <div id="input-comp" data-toggle="modal" href="#compareSim">compare input records</div>
                 {% else %}
                     no input files
@@ -110,7 +130,7 @@
     <form class="form-horizontal">
         <fieldset class = 'field-acc'>
             <div class="control-group">
-                <table>
+                <table style="width:100%">
                     <tr><td colspan="4">{{record.datastore.access_parameters.root}}</td></tr>
                         {% for file in record.output_data.all %}
                                 <tr class="{% cycle 'odd' 'even' %}">
@@ -118,17 +138,34 @@
                                 <td>{{file.digest}}</td>
                                 <td>{{file.get_metadata.mimetype|default:""}}</td>
                                 <td>{{file.get_metadata.size|filesizeformat}}</td>
-                                <td>View 
-                                    <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=spikes&path={{file.path|urlencode}}&digest={{file.digest}}">spikes</a>
-                                    <a target='_blank' href="/{{project_name}}/{{record.label}}/plotdata?plot=voltage&path={{file.path|urlencode}}&digest={{file.digest}}">voltage</a>
-
-                                    <a target='_blank' href="/{{project_name}}/plot?template=raster_plot.html&path={{file.path|urlencode}}">raster plot</a>
-                                    <a target='_blank' href="/{{project_name}}/plot?template=histogram.html&path={{file.path|urlencode}}">histogram</a>
-
-                                </td></tr>
+                                <td><input type='checkbox' name='{{file.path|urlencode}}' class='files' label='{{record.label}}' digest='{{file.digest}}'></input></td>
+                                </tr>
                         {% endfor %}
                 </table>
-             <div><a target='_blank' href="/{{project_name}}/plot?template=raster_plot_multiple_files.html{% for file in record.output_data.all %}&path={{file.path|urlencode}}{% endfor %}">raster plot</a><div>
+
+                <div class="btn-group">
+                  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    Plot from your template
+                    <span class="caret"></span>
+                  </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                    {% for template in templates %}
+                      <li><a class="plot_template" tabindex="-1" href="#" id="{{template}}">{{template}}</a></li>
+                    {% endfor %}
+                    </ul>
+                </div>
+
+                <div class="btn-group">
+                  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    Plot from default template
+                    <span class="caret"></span>
+                  </a>
+                    <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu">
+                         <li><a class="plot_default_template" href="#" id="spikes" >spikes</a></li>
+                         <li><a class="plot_default_template" href="#" id="voltage" >voltage</a></li>
+                    </ul>
+                </div>
+
             </div>
         </fieldset>
     </form>
@@ -220,11 +257,34 @@ $(document).ready(function(){
         }
     });
 
-});
+$('.plot_template').live('click', function(e){
+    e.preventDefault();
+    var template = $(this).attr('id');
+    var selected = [];
+    $('.files:checked').each(function() {
+        selected.push($(this).attr('name'));
+    });
 
-{% for temp in templates %}
-console.log("{{temp}}")
-{% endfor %}
+    if (selected.length > 0) {
+        window.open('/{{project_name}}/plot?template='+template+'&path='+selected.join('&path='),'_blank')
+    }
+
+})
+
+$('.plot_default_template').live('click', function(e){
+    e.preventDefault();
+    var plot = $(this).attr('id');
+    var selected = [];
+    $('.files:checked').each(function() {
+        selected.push($(this).attr('name'));
+    });
+    if (selected.length > 0) {
+        window.open('/{{project_name}}/{{record.label}}/plotdata?plot='+plot+'&path='+selected.join('&path='),'_blank')
+    }
+
+})
+
+});
 </script>
 
 {% endblock %}
