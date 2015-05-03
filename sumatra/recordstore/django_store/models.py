@@ -205,6 +205,9 @@ class DataKey(BaseModel):
         metadata = eval(self.metadata)
         return datastore.DataKey(self.path, self.digest, **metadata)
 
+    def file_exists(self, datapath=os.path.join(os.getcwd(), 'Data')):
+        return os.path.exists(os.path.join(datapath, self.path))
+
 
 class PlatformInformation(BaseModel):
     architecture_bits = models.CharField(max_length=100)
@@ -296,5 +299,10 @@ class Record(BaseModel):
     def working_directory(self):
         return self.launch_mode.get_parameters().get('working_directory', None)
 
-    def file_exists(self):
-        return self.to_sumatra().file_exists
+    def output_file_exists(self):
+        if len(self.output_data.all()) == 0: return False
+        return all([file.file_exists() for file in self.output_data.all() ])
+
+    def input_file_exists(self):
+        if len(self.input_data.all()) == 0: return False
+        return all([file.file_exists() for file in self.input_data.all() ])

@@ -84,8 +84,8 @@ class DataKey(object):
 
     def __ne__(self, other):
         return not self.__eq__(other)
-        
-        
+
+
 class DataItem(object):
     """Base class for data item classes, that may represent files or database records."""
     
