@@ -105,7 +105,19 @@ class TextFormatter(Formatter):
 
     def keyword(self, keyword=None):
         """Return a list of record labels plus one content of the record, one per line."""
-        return "\n".join("%s\t%s" %(record.label, str(getattr(record, keyword))) for record in self.records if hasattr(record, keyword))
+        if ',' in keyword:
+            keywords = keyword.split(',')
+        else:
+            keywords = [keyword]
+        rec_print = []
+        for record in self.records:
+            info_list = [record.label]
+            for kw in keywords:
+                if hasattr(record,kw):
+                    info_list.append(str(getattr(record,kw)))
+            rec_print.append('\t'.join(info_list))
+        return '\n'.join(rec_print)
+        #return "\n".join("%s\t%s" %(record.label, str(getattr(record, keyword))) for record in self.records if hasattr(record, keyword))
 
     def output_files(self):
         """Return a list of record files, one per line."""
