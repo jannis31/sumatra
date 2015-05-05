@@ -391,10 +391,12 @@ def plot_data(request, project, label):
         for path in pathlist:
             data.extend(np.loadtxt('Data/'+path))
         data = np.array(data)
-        if request.GET['plot'] == 'spikes':
-            return render_to_response("d3_raster_plot.html", {'data': data.tolist(), 'neurons':range(100), 'simtime':500, 
-                                            'path': path,
-                                           'project_name': project,})
+        if request.GET['plot'].startswith('spikes'):
+            if request.GET['plot'] == 'spikes_raster':
+                template = 'd3_raster_plot.html'
+            elif request.GET['plot'] == 'spikes_histogram':
+                template = 'd3_histogram.html'
+            return render_to_response(template, {'data': data.tolist(), 'path': path, 'project_name': project,})
         elif request.GET['plot'] == 'voltage':
             idx = request.GET.getlist('idx', [])
             neurons = np.unique(data[:,0])

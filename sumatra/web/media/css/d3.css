@@ -1,8 +1,11 @@
-.axis path,
-.axis line {
-    fill: none;
-    stroke: black;
-    shape-rendering: crispEdges;
+svg {
+  font: 10px sans-serif;
+}
+
+.axis line, .axis path {
+  shape-rendering: crispEdges;
+  stroke: black;
+  fill: none;
 }
 
 .axis text {
@@ -13,4 +16,13 @@
 .line {
     fill: none;
     stroke: black;
+}
+
+.bar {
+  shape-rendering: crispEdges;
+  fill: steelblue;
+}
+
+.bar:hover {
+  fill: lightskyblue;
 }

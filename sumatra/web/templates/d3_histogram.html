@@ -1,0 +1,87 @@
+{% extends "d3_plot_base.html" %}
+
+{% load filters %}
+
+{% block title %}{{project_name}}: {{path}}{% endblock %}
+
+{% block content %}
+<script type="text/javascript">
+var data = {{ data }}
+
+var margin = {top: 30, right: 20, bottom: 30, left: 40}, 
+    width = 960 - margin.left - margin.right, 
+    height = 500 - margin.top - margin.bottom;
+
+window.onload = function() {
+    var xScale = d3.scale.linear()
+        .range([0, width])
+        .domain(d3.extent(data, function(d) { return d[1] }))
+        .nice(10);
+
+    var yScale = d3.scale.linear()
+        .range([height, 0]);
+
+    var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom")
+        .ticks(5);
+
+    var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .ticks(5);
+
+    var svg = d3.select('body').append('svg')
+        .attr('width', width + margin.right + margin.left)
+        .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+    svg.append("text")
+        .attr("class", "title")
+        .attr("x", width/2-margin.left)
+        .attr("y", -10)
+        .text("Spike count histogram");
+
+    var hist = d3.layout.histogram()
+        .bins(xScale.ticks(100))
+        (data.map(function(d) {return d[1]; }));
+
+    yScale.domain(d3.extent(hist, function(d) { return d.y }))
+        .nice(10);
+
+    svg.selectAll(".bar")
+        .data(hist)
+      .enter().append("rect")
+        .attr("class", "bar")
+        .attr("x", function(d) {return xScale(d.x)+.5; })
+        .attr("y", function(d) {return yScale(d.y); })
+        .attr("width", width / hist.length - 1)
+        .attr("height", function(d) { return height - yScale(d.y)-1; });
+
+    // draw the x axis
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis)
+      .append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "middle")
+        .attr("x", width/2)
+        .attr("y", margin.bottom-1)
+        .text("Time (ms)");
+
+    // draw the y axis
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", -38)
+        .attr('x', -height/2+margin.top)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Spike count");
+};
+</script>
+{% endblock %}
