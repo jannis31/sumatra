@@ -4,16 +4,74 @@
 
 {% block title %}{{record.label}}{% endblock %}
 
+{% block extrahead %}
+<link rel="stylesheet" href='/media/css/jquery.dataTables.css'>
+<style type="text/css">
+#pageBody {
+    margin: 0 20px;
+}
+
+#param_table th, #param_table td {
+min-width: 100px;
+padding-left: 10px;
+padding-right: 10px;
+border-left: 1px solid #ccc;
+border-right: 1px solid #ccc;
+}
+
+tfoot input {
+        width: 100%;
+        padding: 3px;
+        box-sizing: border-box;
+    }
+</style>
+
+<script type="text/javascript" src="/media/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    // Setup - add a text input to each footer cell
+    $('#param_table tfoot th').each( function () {
+        var title = $('#example thead th').eq( $(this).index() ).text();
+        $(this).html( '<input type="text" placeholder="Search '+title+'" />' );
+    } );
+
+    // DataTable
+    var table = $('#param_table').DataTable();
+ 
+    // Apply the search
+    table.columns().every( function () {
+        var that = this;
+        $( 'input', this.footer() ).on( 'keyup change', function () {
+            that.search( this.value ).draw();
+        } );
+    } );
+} );
+</script>
+{% endblock %}
+
+
 {% block header %}
-            <li class="divider"></li>
-            <li><a href="/{{project_name}}/">{{project_name}}</a></li>
-            <li><a href="/{{project_name}}/{{record.label}}/"> {{record.label}}</a></li>
+    <li class="divider"></li>
+    <li><a href="/{{project_name}}/">{{project_name}}</a></li>
+    <li><a href="/{{project_name}}/{{record.label}}/"> {{record.label}}</a></li>
 {% endblock %}
     
 {% block content %}
+<div role="tabpanel" id='tabs'>
 
-<div class="accordion">
-    <h2 class="nav-toggle">General info</h2>
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">General info</a></li>
+    <li role="presentation"><a href="#parameters" aria-controls="profile" role="tab" data-toggle="tab">Parameters</a></li>
+    <li role="presentation"><a href="#files" aria-controls="messages" role="tab" data-toggle="tab">Files</a></li>
+    <li role="presentation"><a href="#dependencies" aria-controls="settings" role="tab" data-toggle="tab">Dependencies</a></li>
+    <li role="presentation"><a href="#plattform" aria-controls="settings" role="tab" data-toggle="tab">Plattform info</a></li>
+    <li role="presentation"><a href="#debug" aria-controls="settings" role="tab" data-toggle="tab">Stdout & Stderr</a></li>
+  </ul>
+
+<div class="tab-content">
+
+<div role="tabpanel" class="tab-pane active" id="home">
     <form action='{{ request.path }}' method='POST' id="actions" name="actions">
         {{form.errors}}
         <fieldset class = 'field-acc'>
@@ -47,24 +105,64 @@
     </form>
 </div>
 
-<div id="accordion-js" class="accordion">
-    <h2 class="nav-toggle">Parameters</h2>
-    <form class="form-horizontal">
-        <fieldset class = 'field-acc'>
-            <div class="control-group">
-                {% if parameters %}
-		        <table>
-                        {% for name, value in parameters.items %}<tr><td><div class='label label-success' style='display:inline-block'>{{name}}</div></td><td><pre style='margin-top:5px'>{{value}}</pre></td></tr>{% endfor %}
-			</table>
-                {% else %}
-                    no parameters
-                {% endif %}
-            </div>
-        </fieldset>
-    </form>
+<div role="tabpanel" class="tab-pane" id="parameters">
+<!--    <form class="form-horizontal">-->
+<!--        <fieldset class = 'field-acc'>-->
+<!--            <div class="control-group">-->
+<!--                {% if parameters %}-->
+<!--		        <table>-->
+<!--                        {% for name, value in parameters.items %}<tr><td><div class='label label-success' style='display:inline-block'>{{name}}</div></td><td><pre style='margin-top:5px'>{{value}}</pre></td></tr>{% endfor %}-->
+<!--			</table>-->
+<!--                {% else %}-->
+<!--                    no parameters-->
+<!--                {% endif %}-->
+<!--            </div>-->
+<!--        </fieldset>-->
+<!--    </form>-->
+
+<table id="param_table" class="display" width="100%" cellspacing="0">
+
+<thead>
+<tr>
+<th class="date">Date</th><th>Label</th><th>Version</th>
+{% for key in keys %}
+<th class="{{key}}">{{ key }}</th>
+{% endfor %}
+</tr>
+
+<tr>
+<td class="date">{{ record.timestamp }}</td><td>{{ record.label }}</td><td>{{ record.version|cut:"vers" }}</td>
+{% for key in keys %}
+<td class="{{key}}">{{ record.parameters.to_sumatra.as_dict|get_item:key }}</td>
+{% endfor %}
+</tr>
+</thead>
+
+<tbody>
+{% for record in object_list %}
+<tr>
+<td class="date">{{ record.timestamp }}</td><td><a href='/{{project_name}}/{{record.label}}/' target='_blank'>{{ record.label }}</a></td><td>{{ record.version|cut:"vers" }}</td>
+{% for key in keys %}
+<td class="{{key}}">{{ record.parameters.to_sumatra.as_dict|get_item:key }}</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+
+<tfoot>
+<tr>
+<th>Date</th><th>Label</th><th>Version</th>
+{% for key in keys %}
+<th>{{ key }}</th>
+{% endfor %}
+</tr>
+</tfoot>
+
+</table>
+
 </div>
 
-<div class="accordion">
+<div role="tabpanel" class="tab-pane" id="files">
     <h2 class="nav-toggle">Input files</h2>
     <form class="form-horizontal">
         <fieldset class = 'field-acc'>
@@ -122,10 +220,7 @@
             </div>
         </fieldset>
     </form>
-</div>
 
-
-<div class="accordion">
     <h2 class="nav-toggle">Output files</h2>
     <form class="form-horizontal">
         <fieldset class = 'field-acc'>
@@ -172,8 +267,7 @@
     </form>
 </div>
 
-<div class="accordion">
-    <h2 class="nav-toggle">Dependencies</h2>
+<div role="tabpanel" class="tab-pane" id="dependencies">
     <form class="form-horizontal">
         <fieldset class = 'field-acc'>
             <div class="control-group">
@@ -187,8 +281,7 @@
     </form>
 </div>                   
 
-<div class="accordion">
-    <h2 class="nav-toggle">Platform information</h2>
+<div role="tabpanel" class="tab-pane" id="plattform">
     <form class="form-horizontal">
         <fieldset class = 'field-acc'>
             <div class="control-group">
@@ -214,8 +307,7 @@
     </form>
 </div>
 
-<div class="accordion">
-    <h2 class="nav-toggle">Stdout & Stderr</h2>
+<div role="tabpanel" class="tab-pane" id="debug">
     <form class="form-horizontal">
         <fieldset class = 'field-acc'>
             <div class="control-group">
@@ -230,13 +322,16 @@
         </fieldset>
     </form>
 </div>
+</div>
 
+</div>
 {% include "comparison_window.html" %} <!-- 'compare selected records' popup window -->
 
 <script type = 'text/javascript'>
 var nbSelected = 3;
 
 $(document).ready(function(){
+    $('#tabs a:last').tab('show');
     $('.modal').modal().modal('hide');
 
     $('.accordion').find('h2').click(function(){
@@ -267,7 +362,7 @@ $('.plot_template').live('click', function(e){
     });
 
     if (selected.length > 0) {
-        window.open('/{{project_name}}/plot?template='+template+'&path='+selected.join('&path='),'_blank')
+        window.open('/{{project_name}}/plot?template='+template+'.html&path='+selected.join('&path='),'_blank')
     }
 
 })

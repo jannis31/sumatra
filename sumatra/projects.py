@@ -271,8 +271,15 @@ class Project(object):
     def format_records(self, format='text', mode='short', tags=None, reverse=False, params_filter=None, keyword=None, *args, **kwargs):
         records = self.record_store.list(self.name, tags, *args, **kwargs)
         if params_filter is not None:
-            k,v = params_filter.split('=')
-            records = [record for record in records if str(record.parameters.as_dict().get(k)) == v]
+            if ',' in params_filter:
+                for pf in params_filter.split(','):
+                    if '=' in pf:
+                        k,v = pf.split('=')
+                        records = [record for record in records if str(record.parameters.as_dict().get(k)) == v]
+            else:
+                if '=' in params_filter:
+                    k,v = params_filter.split('=')
+                    records = [record for record in records if str(record.parameters.as_dict().get(k)) == v]
         if reverse:
             records.reverse()
         formatter = get_formatter(format)(records, project=self, tags=tags)

@@ -130,10 +130,19 @@ def record_detail(request, project, label):
     parameter_set = record.parameters.to_sumatra()
     if hasattr(parameter_set, "as_dict"):
         parameter_set = parameter_set.as_dict()
-    templates_list = [t for t in os.listdir(os.getcwd()+'/.smt/templates') if t.endswith('.html')]
+
+    object_list = Record.objects.filter(project_id=project, main_file=record.main_file).exclude(label=record.label)
+    keys = map(lambda x: x.parameters.to_sumatra().as_dict().keys(), object_list)
+    try:
+        ukeys = map(lambda x: list(set(x))[0], zip(*keys))
+    except:
+        ukeys = []
+
+    templates_list = [t.split('.')[0] for t in os.listdir(os.getcwd()+'/.smt/templates') if t.endswith('.html')]
     return render_to_response('record_detail.html', {'record': record,
                                                      'project_name': project,
                                                      'parameters': parameter_set,
+                                                     'object_list':object_list, 'keys': ukeys, 
                                                      'form': form,
                                                      'templates': templates_list,
                                                      })

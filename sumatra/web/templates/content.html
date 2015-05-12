@@ -11,7 +11,7 @@
 </style><!-- hide the columns which was selected in settings to be hidden -->
 
 <div id = 'main_content'>
-    <div style = 'height:40px;'>
+    <div style = 'height:60px;'>
         <a id='btn_newrec' class='btn btn-danger btn-large' style='width:100px;float:left'>
             <i class="icon-file"></i> New record
         </a>
@@ -81,24 +81,24 @@
             <input type="radio" id="time" />
             <label class='t-item head-item' id='l-time' for="time-t">Time</label>      
             <input type="radio" id="ename" />
-            <label id='l-ename' class='t-item head-item' for="ename-t"><div>Executable</div><div>name</div></label>    
+            <label id='l-ename' class='t-item head-item' for="ename-t">Exec name</label>    
             <input type="radio" id="eversion" />
-            <label id='l-eversion' class='t-item head-item' for="eversion-t"><div>Executable</div><div>version</div></label>  
+            <label id='l-eversion' class='t-item head-item' for="eversion-t">Exec version</label>  
             <input type="radio" id="main" />
-            <label class='t-item head-item' id='l-main' for="main-t"><div>Main</div><div>file</div></label> 
+            <label class='t-item head-item' id='l-main' for="main-t">Main file</label> 
             <input type="radio" id="version" />
             <label class='t-item head-item' id='l-version' for="version-t">Version</label> 
             <input type="radio" id="arguments" />
             <label class='t-item head-item' id='l-arguments' for="arguments-t">Arguments</label>
             <input type="radio" id="file" />
-            <label class='t-item head-item' id='l-inputfile' for="inputfile-t"><div>Input</div><div>File</div></label>
-            <label class='t-item head-item' id='l-outputfile' for="outputfile-t"><div>Output</div><div>File</div></label>
+            <label class='t-item head-item' id='l-inputfile' for="inputfile-t">Inputs</label>
+            <label class='t-item head-item' id='l-outputfile' for="outputfile-t">Outputs</label>
 
         </div>
     </div>
     <ol id ='ol-content'>
     {% for record in object_list %}
-      <li class='record {{settings.display_density}}'>
+      <li class='record {{settings.display_density}} {% cycle 'odd' 'even' %}'>
         <div id = 'version-hid' class='d-hid'>{{record.version}}</div>
         <div id = 'repo-hid' class='d-hid'>{{record.repository.url}}</div>
         <div class='row-item' id='repository-t'><span class="span-box">{{record.repository.url|cut:"repo"}}</span></div>

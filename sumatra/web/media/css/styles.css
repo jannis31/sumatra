@@ -32,7 +32,6 @@ a.active{
 
 .btn-group{
     float: right;
-    margin-right: 25px;
 }
 
 #dropdown_menu{
@@ -48,7 +47,8 @@ a.active{
 }
 
 #pageBody{
-    margin-left: 20px;
+    margin: 0 20px;
+
 }
 
 #name_page{
@@ -75,6 +75,18 @@ a.active{
     margin-left: 0;
 }
 
+.tab-content {
+    overflow: visible
+}
+
+.even {
+background-color: #f9f9f9;
+}
+
+.date {
+    min-width: 130px !important;
+}
+
 .subitems{
     margin-left: 20px;
     font-size: 10px;
@@ -82,7 +94,7 @@ a.active{
 
 .subnav {
   height: 36px;
-  background-color: #eeeeee; /* Old browsers */
+  background-color: #efe; /* Old browsers */
   background-repeat: repeat-x; /* Repeat the gradient */
   background-image: -moz-linear-gradient(top, #f5f5f5 0%, #eeeeee 100%); /* FF3.6+ */
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f5f5f5), color-stop(100%,#eeeeee)); /* Chrome,Safari4+ */
@@ -860,17 +872,10 @@ h2.topic{
 
 .head-table{
     height: 35px;
-    background:url("../img/light_toast.png") 0% 0% transparent;
     line-height: 35px;
     padding: 3px 6px;
-    box-shadow:0 1px 1px rgba(0, 0, 0, 0.12), 0 0 0 #000000 inset;
-    font-family: "Open Sans","lucida grande","Segoe UI",arial,verdana,"lucida sans unicode",tahoma,sans-serif;
-    border-color:#82CFFA #E7F2FB #96C4EA;
-    border-style: solid;
-    border-width: 1px;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), 0 0 0 #000000 inset;
-    margin-right: 25px;
-    margin-top: 10px;
+    border-top: 1px solid #000;
+    border-bottom: 1px solid #000;
 }
 
  #head_c{
@@ -888,38 +893,34 @@ h2.topic{
 }
  
 #l-label, #label-t{
-    width: 140px; 
+    min-width: 140px; 
     cursor: pointer; 
 }
 
-#l-ename, #l-eversion, #l-main, #l-inputfile, #l-outputfile {
-  margin-top: 0px;
-}
-
 #l-main, #main-t {
-    width: 150px;
+    min-width: 150px;
 }
 
 #l-date, #date-t {
-    width: 100px;
+    min-width: 100px;
 }
 
 #l-reason, #reason-t {
-    width: 100px;
+    min-width: 100px;
 }
 
 #l-outcome, #outcome-t {
-    width: 100px;
+    min-width: 100px;
 }
 
 #l-duration, #duration-t {
-    width: 70px;
+    min-width: 70px;
 }
 
 .t-item{
     cursor: pointer; 
     margin-top: 8px;
-    width: 6.0%;
+    min-width: 6.0%;
 }
 .nonselect{
     -webkit-touch-callout: none;
@@ -1011,7 +1012,6 @@ input[type="radio"]:checked+label{ font-weight: bold }
 
 #div-paginator{
   float:right;
-  margin-right: 10px;
 }
 
 .ui-resizable { 
@@ -1079,8 +1079,7 @@ div.headercode{
 }
 
 #ol-content{
-    margin-left:0px;
-    margin-right: 25px;
+    margin:0px;
 }
 
 .ol-compare{
