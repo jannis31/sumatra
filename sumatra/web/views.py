@@ -376,7 +376,7 @@ class SettingsView(View):
     def post(self, request):
         if settings.READ_ONLY: return HttpResponse('Read-only')
         settings = self.load_settings()
-        data = json.loads(request.body)
+        data = json.loads(request.body.decode('utf-8'))
         settings.update(data["settings"])
         self.save_settings(settings)
         return HttpResponse('OK')
