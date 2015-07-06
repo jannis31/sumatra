@@ -411,7 +411,7 @@ def list(argv):  # add 'report' and 'log' as aliases
                         help="prints full information for each record")
     parser.add_argument('-T', '--table', action="store_const", const="table",
                         dest="mode", help="prints information in tab-separated columns")
-    parser.add_argument('-f', '--format', metavar='FMT', choices=['text', 'html', 'latex', 'shell', 'json', 'csv', 'tsv'],
+    parser.add_argument('-F', '--format', metavar='FMT', choices=['text', 'html', 'latex', 'shell', 'json', 'csv', 'tsv'],
                         default='text',
                         help="FMT can be 'text' (default), 'html', 'json', 'latex' or 'shell'.")
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
@@ -421,6 +421,7 @@ def list(argv):  # add 'report' and 'log' as aliases
                         help="use version REV of the code. The first 5 characters is sufficent for filtering list of records.")
     parser.add_argument('-p', '--parameter_view', action="store_const", const="parameter_view",
                         dest="mode", help="list records with a set of parameter")
+    parser.add_argument('-f', '--params_filter', metavar='PARAMs_FILTER', default=None, help="filter records by parameter value")
     #parser.add_argument('-k', '--keyword', metavar='KW', default=None,  help="additional information to label")
     parser.add_argument('-o', '--output_files', action="store_const", const="output_files",
                         dest="mode", help="list output files")
@@ -431,7 +432,7 @@ def list(argv):  # add 'report' and 'log' as aliases
         f = open('.smt/labels', 'w')
         f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
         f.close()
-    kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'reverse':args.reverse}
+    kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'params_filter': args.params_filter, 'reverse':args.reverse}
     if args.main_file is not None: kwargs['main_file__startswith'] = args.main_file
     if args.version is not None: kwargs['version__startswith'] = args.version
     print(project.format_records(**kwargs))

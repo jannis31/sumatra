@@ -54,6 +54,7 @@ except ImportError:
     yaml_loaded = False
 import parameters
 from .core import component, component_type, get_registered_components, conditional_component
+from parameters import nesteddictflatten
 
 POP_NONE = "eiutbocqnluiegnclqiuetyvbietcbdgsfzpq"
 
@@ -128,17 +129,6 @@ def _dict_diff(a, b):
         if len(result1) + len(result2) == 0:
             assert a == b, "Error in _dict_diff()"
         return result1, result2
-
-
-def flatten_dict(init, lkey=''):
-    ret = {}
-    for rkey,val in init.items():
-        key = lkey+rkey
-        if isinstance(val, dict):
-            ret.update(flatten_dict(val, key+'.'))
-        else:
-            ret[key] = val
-    return ret
 
 
 @conditional_component(condition=yaml_loaded)

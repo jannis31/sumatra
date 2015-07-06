@@ -69,6 +69,19 @@ def _remove_left_margin(s):  # replace this by textwrap.dedent?
 def _get_project_file(path):
     return os.path.join(path, ".smt", DEFAULT_PROJECT_FILE)
 
+def _filter_param(record):
+    import parameters
+    parameter_set = record.parameters
+    if hasattr(parameter_set, 'as_dict'):
+        parameter_set = parameter_set.as_dict()
+    parameter_set = parameters.nesteddictflatten(parameter_set)
+    return parameter_set
+
+def _filter_record_by_param(records, parameter):
+    if '=' in parameter:
+        pkey,pvalue = parameter.split('=')
+        return filter(lambda record: str(_filter_param(record).get(pkey)) == pvalue, records)
+    return records
 
 class Project(object):
     valid_name_pattern = r'(?P<project>\w+[\w\- ]*)'
@@ -293,16 +306,19 @@ class Project(object):
         self._most_recent = self.record_store.most_recent(self.name)
         return n
 
-    def find_records(self, tags=None, reverse=False, *args, **kwargs):
+    def find_records(self, tags=None, params_filter=None, reverse=False, *args, **kwargs):
         records = self.record_store.list(self.name, tags, *args, **kwargs)
+        if params_filter is not None:
+            for parameter in params_filter.split(','):
+                records = _filter_record_by_param(records,parameter)
         if reverse:
             records.reverse()
         return records
 
     # def find_data() here?
 
-    def format_records(self, format='text', mode='short', tags=None, reverse=False, keyword=None, *args, **kwargs):
-        records = self.find_records(tags=tags, reverse=reverse, *args, **kwargs)
+    def format_records(self, format='text', mode='short', tags=None, reverse=False, keyword=None, params_filter=None, *args, **kwargs):
+        records = self.find_records(tags=tags, params_filter=params_filter, reverse=reverse, *args, **kwargs)
         formatter = get_formatter(format)(records, project=self, tags=tags)
         return formatter.format(mode,keyword=keyword)
 

@@ -17,7 +17,7 @@ import textwrap
 import cgi
 import re
 from ..core import component, component_type, get_registered_components
-from ..parameters import flatten_dict
+import parameters
 from functools import reduce
 import operator
 
@@ -275,7 +275,7 @@ class ParamsTable(object):
             parameter_set = row.parameters
             if hasattr(parameter_set, 'as_dict'):
                 parameter_set = parameter_set.as_dict()
-            parameter_set = flatten_dict(parameter_set)
+            parameter_set = parameters.nesteddictflatten(parameter_set)
             for key in parameter_set.keys():
                 if key not in param_headers:
                     param_headers.append(key)
@@ -293,7 +293,7 @@ class ParamsTable(object):
                     parameter_set = row.parameters
                     if hasattr(parameter_set, 'as_dict'):
                         parameter_set = parameter_set.as_dict()
-                    parameter_set = flatten_dict(parameter_set)
+                    parameter_set = parameters.nesteddictflatten(parameter_set)
                     column_val_width.append(len(str(parameter_set.get(header))))
                 column_width = max([len(header)] + column_val_width)
             column_widths.append(min(self.max_column_width, column_width))
@@ -311,7 +311,7 @@ class ParamsTable(object):
             parameter_set = row.parameters
             if hasattr(parameter_set, 'as_dict'):
                 parameter_set = parameter_set.as_dict()
-            parameter_set = flatten_dict(parameter_set)
+            parameter_set = parameters.nesteddictflatten(parameter_set)
             output += format % tuple(
                 [str(getattr(row, header))[:self.max_column_width] for header in self.headers[:3]]
                +[str(parameter_set.get(header,''))[:self.max_column_width] for header in self.headers[3:]])
