@@ -78,8 +78,8 @@
         </span>
             {{record.timestamp|date:"d/m/Y H:i:s"}}
         </td>
-        <td>{{record.reason}}</td>
-        <td>{{record.outcome}}</td>
+        <td>{{record.reason|truncatechars:20}}</td>
+        <td>{{record.outcome|truncatechars:20}}</td>
         <td>
             {% for data in record.input_data.all %}
             <a href="/{{project.id}}/data/datafile?path={{data.path|urlencode}}&digest={{data.digest}}&creation={{data.creation|date:"c"}}">
@@ -96,7 +96,7 @@
         <td>{{record.launch_mode.get_parameters.n|default:"1"}}</td>
         <td>{{record.executable.name}} {{record.executable.version}}</td>
         <td><a target="script_content" onclick="window.open('/script?digest={{record.version}}&main_file={{record.main_file}}','script_content','width=640,height=600,scrollbars=yes,resizable=yes')"><span class="glyphicon glyphicon-file"></span></a> {{record.main_file|ubreak}}</td>
-        <td>{{record.version|cut:"vers"}}{% if record.diff %}*{% endif %}</td>
+        <td title='{{record.version}}'>{{record.version|truncatechars:10}}{% if record.diff %}*{% endif %}</td>
         <td>{{record.script_arguments}}</td>
         <td>{{record.tags}}</td>
     </tr>
