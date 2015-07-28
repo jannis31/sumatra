@@ -85,6 +85,10 @@ def get_working_copy(path=None):
         wc = working_copy_type(os.path.realpath(path))
         if wc.exists:
             return wc
+        else:
+            wc = working_copy_type(os.path.realpath(os.path.dirname(path)))
+            if wc.exists:
+                return wc
     err_msg = "No working copy found at %s." % path + vcs_err_msg()
     raise VersionControlError(err_msg)
 

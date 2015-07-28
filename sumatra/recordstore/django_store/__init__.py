@@ -54,6 +54,7 @@ class DjangoConfiguration(object):
                                'tagging'],
             'STATICFILES_DIRS': ['.smt/static','Data'],
             'MIDDLEWARE_CLASSES': [],
+            'LABEL_DB': {},
         }
         self._n_databases = 0
         self.configured = False
@@ -96,6 +97,9 @@ class DjangoConfiguration(object):
             else:
                 label = 'database%g' % self._n_databases
             self._settings['DATABASES'][label] = db
+            self._settings['LABEL_DB'][uri.split('/')[0]] = label
+            if os.path.exists(uri.split('/')[0] + '/Data'):
+                self._settings['STATICFILES_DIRS'].append(uri.split('/')[0] + '/Data')
             self._n_databases += 1
         return label
 

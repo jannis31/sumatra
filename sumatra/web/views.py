@@ -33,11 +33,19 @@ DEFAULT_MAX_DISPLAY_LENGTH = 10 * 1024
 global_conf_file = os.path.expanduser(os.path.join("~", ".smtrc"))
 mimetypes.init()
 
+_label_db = settings.LABEL_DB
+
 
 class ProjectListView(ListView):
     model = Project
     context_object_name = 'projects'
     template_name = 'project_list.html'
+
+    def get_queryset(self):
+        projects = []
+        for db in settings.DATABASES.keys():
+            projects.extend(Project.objects.using(db).all())
+        return projects
 
 
 class ProjectDetailView(DetailView):
@@ -45,7 +53,7 @@ class ProjectDetailView(DetailView):
     template_name = 'project_detail.html'
 
     def get_object(self):
-        return Project.objects.get(pk=self.kwargs["project"])
+        return Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
 
     def get_context_data(self, **kwargs):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
@@ -71,12 +79,12 @@ class RecordListView(ListView):
     template_name = 'record_list.html'
 
     def get_queryset(self):
-        return Record.objects.filter(project__id=self.kwargs["project"]).order_by('-timestamp')
+        return Record.objects.using(_label_db.get(self.kwargs["project"],'default')).filter(project__id=self.kwargs["project"]).order_by('-timestamp')
 
     def get_context_data(self, **kwargs):
         context = super(RecordListView, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.get(pk=self.kwargs["project"])
-        context['tags'] = Tag.objects.all()  # would be better to filter, to return only tags used in this project.
+        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
+        context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
         context['read_only'] = settings.READ_ONLY
         return context
 
@@ -91,11 +99,11 @@ class RecordDetailView(DetailView):
 
     def get_object(self):
         label = unescape(self.kwargs["label"])
-        return Record.objects.get(label=label, project__id=self.kwargs["project"])
+        return Record.objects.using(_label_db.get(self.kwargs["project"],'default')).get(label=label, project__id=self.kwargs["project"])
 
     def get_context_data(self, **kwargs):
         context = super(RecordDetailView, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.get(pk=self.kwargs["project"])
+        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
         context['project_name'] = self.kwargs["project"]  # use project full name?
         parameter_set = self.object.parameters.to_sumatra()
         if hasattr(parameter_set, "as_dict"):
@@ -120,11 +128,11 @@ class DataListView(ListView):
     template_name = 'data_list.html'
 
     def get_queryset(self):
-        return DataKey.objects.filter(output_from_record__project_id=self.kwargs["project"])
+        return DataKey.objects.using(_label_db.get(self.kwargs["project"],'default')).filter(output_from_record__project_id=self.kwargs["project"])
 
     def get_context_data(self, **kwargs):
         context = super(DataListView, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.get(pk=self.kwargs["project"])
+        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
         return context
 
 
@@ -135,11 +143,11 @@ class DataDetailView(DetailView):
         attrs = dict(path=self.request.GET['path'],
                      digest=self.request.GET['digest'],
                      creation=datestring_to_datetime(self.request.GET['creation']))
-        return DataKey.objects.get(**attrs)
+        return DataKey.objects.using(_label_db.get(self.kwargs["project"],'default')).get(**attrs)
 
     def get_context_data(self, **kwargs):
         context = super(DataDetailView, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.get(pk=self.kwargs["project"])
+        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
         context['project_name'] = self.kwargs["project"]  # use project full name?
 
         if 'truncate' in self.request.GET:
@@ -217,10 +225,10 @@ class DataDetailView(DetailView):
 
 
 def parameter_list(request, project):
-    project_obj = Project.objects.get(id=project)
+    project_obj = Project.objects.using(_label_db.get(project,'default')).get(id=project)
     main_file = request.GET.get('main_file', None)
     if main_file:
-        record_list = Record.objects.filter(project_id=project, main_file=main_file)
+        record_list = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project, main_file=main_file)
         keys = []
         for record in record_list:
             try:
@@ -240,15 +248,15 @@ def parameter_list(request, project):
 
 
 def image_list(request, project):
-    project_obj = Project.objects.get(id=project)
-    tags = Tag.objects.all()
+    project_obj = Project.objects.using(_label_db.get(project,'default')).get(id=project)
+    tags = Tag.objects.using(_label_db.get(project,'default')).all()
     offset = int(request.GET.get('offset',0))
     limit = int(request.GET.get('limit',8))
     selected_tag = request.GET.get('selected_tag',None)
     if selected_tag:
-        record_all = Record.objects.filter(project_id=project, tags__contains=selected_tag)
+        record_all = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project, tags__contains=selected_tag)
     else:
-        record_all = Record.objects.filter(project_id=project)
+        record_all = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project)
     if request.is_ajax():
         data = []
         for record in record_all:
@@ -278,7 +286,7 @@ def delete_records(request, project):
     if isinstance(delete_data, str):
         # Convert strings returned from Javascript function into Python bools
         delete_data = {'false': False, 'true': True}[delete_data]
-    records = Record.objects.filter(label__in=records_to_delete, project__id=project)
+    records = Record.objects.using(_label_db.get(project,'default')).filter(label__in=records_to_delete, project__id=project)
     if records:
         for record in records:
             if delete_data:
@@ -290,11 +298,11 @@ def delete_records(request, project):
 
 
 def show_content(request, datastore_id):
-    datastore = Datastore.objects.get(pk=datastore_id).to_sumatra()
+    datastore = Datastore.objects.using(_label_db.get(project,'default')).get(pk=datastore_id).to_sumatra()
     attrs = dict(path=request.GET['path'],
                  digest=request.GET['digest'],
                  creation=datestring_to_datetime(request.GET['creation']))
-    data_key = DataKey.objects.get(**attrs).to_sumatra()
+    data_key = DataKey.objects.using(_label_db.get(project,'default')).get(**attrs).to_sumatra()
     mimetype = data_key.metadata["mimetype"]
     try:
         content = datastore.get_content(data_key)
@@ -303,9 +311,9 @@ def show_content(request, datastore_id):
     return HttpResponse(content, content_type=mimetype)
 
 
-def show_script(request):
+def show_script(request, project):
     """ get the script content from the repos """
-    wc = get_working_copy(os.path.os.getcwd())
+    wc = get_working_copy(os.path.join(os.path.os.getcwd(),project))
     digest = request.GET.get('digest', False)
     main_file = request.GET.get('main_file', False)
     try:
@@ -317,12 +325,12 @@ def show_script(request):
 
 def compare_records(request, project):
     record_labels = [request.GET['a'], request.GET['b']]
-    db_records = Record.objects.filter(label__in=record_labels, project__id=project)
+    db_records = Record.objects.using(_label_db.get(project,'default')).filter(label__in=record_labels, project__id=project)
     records = [r.to_sumatra() for r in db_records]
     diff = RecordDifference(*records)
     context = {'db_records': db_records,
                'diff': diff,
-               'project': Project.objects.get(pk=project)}
+               'project': Project.objects.using(_label_db.get(project,'default')).get(pk=project)}
     if diff.input_data_differ:
         context['input_data_pairs'] = pair_datafiles(diff.recordA.input_data, diff.recordB.input_data)
     if diff.output_data_differ:

@@ -27,7 +27,9 @@ def main(argv):
     (options, args) = parser.parse_args(argv)
 
     if args:
-        recordstore = DjangoRecordStore(db_file=args[0])
+        for prj in argv:
+            if os.path.exists(os.path.join(prj,'.smt','records')):
+                recordstore = DjangoRecordStore(db_file=os.path.join(prj,'.smt','records'))
     else:
         project = load_project()
         if not isinstance(project.record_store, DjangoRecordStore):
@@ -43,9 +45,9 @@ def main(argv):
                               os.path.join(root_dir, "templates"),)
     settings.INSTALLED_APPS = list(settings.INSTALLED_APPS) + ['sumatra.web']
     settings.MIDDLEWARE_CLASSES = tuple()
-    
+
     management.call_command('shell')
-    
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])

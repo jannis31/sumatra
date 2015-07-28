@@ -54,7 +54,9 @@ def main(argv):
     (options, args) = parser.parse_args(argv)
 
     if args:
-        recordstore = DjangoRecordStore(db_file=args[0])
+        for prj in argv:
+            if os.path.exists(os.path.join(prj,'.smt','records')):
+                recordstore = DjangoRecordStore(db_file=os.path.join(prj,'.smt','records'))
     else:
         project = load_project()
         if not isinstance(project.record_store, DjangoRecordStore):
@@ -62,6 +64,8 @@ def main(argv):
             print("This project cannot be accessed using the web interface (record store is not of type DjangoRecordStore).")
             sys.exit(1)
         del project
+
+    print(db_config._settings)
 
     root_dir = os.path.dirname(sumatra_web)
     db_config.update_settings(
