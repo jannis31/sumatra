@@ -18,6 +18,7 @@ from sumatra.web import __file__ as sumatra_web
 from optparse import OptionParser
 from textwrap import dedent
 import time
+import pprint
 
 
 def delayed_new_tab(url, delay):
@@ -51,6 +52,8 @@ def main(argv):
                       help="do not open browser")
     parser.add_option('-r', '--read_only', default=False, action="store_true",
                       help="set read-only mode")
+    parser.add_option('-P', '--print_config', default=False, action="store_true",
+                      help="print db configuration")
     (options, args) = parser.parse_args(argv)
 
     if args:
@@ -65,8 +68,6 @@ def main(argv):
             sys.exit(1)
         del project
 
-    print(db_config._settings)
-
     root_dir = os.path.dirname(sumatra_web)
     db_config.update_settings(
         INSTALLED_APPS=db_config._settings["INSTALLED_APPS"] + ['sumatra.web'],
@@ -78,6 +79,7 @@ def main(argv):
         READ_ONLY = options.read_only
     )
 
+    if options.print_config: pprint.pprint(db_config._settings)
     db_config.configure()
 
     if not options.no_browser:

@@ -99,6 +99,7 @@ class DjangoConfiguration(object):
             self._settings['DATABASES'][label] = db
             self._settings['LABEL_DB'][uri.split('/')[0]] = label
             if os.path.exists(uri.split('/')[0] + '/Data'):
+                self._settings['STATICFILES_DIRS'].append(uri.split('/')[0] + '/.smt/static')
                 self._settings['STATICFILES_DIRS'].append(uri.split('/')[0] + '/Data')
             self._n_databases += 1
         return label

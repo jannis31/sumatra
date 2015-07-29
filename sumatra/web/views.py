@@ -21,7 +21,7 @@ except ImportError:  # older versions of Django
     MonthArchiveView = object
 
 import json
-import os.path
+import os
 from django.views.generic import View, DetailView
 from tagging.models import Tag
 from sumatra.recordstore.serialization import datestring_to_datetime
@@ -313,7 +313,11 @@ def show_content(request, datastore_id):
 
 def show_script(request, project):
     """ get the script content from the repos """
-    wc = get_working_copy(os.path.join(os.path.os.getcwd(),project))
+    if os.path.exists(os.path.join(os.getcwd(),project)):
+        path = os.path.join(os.getcwd(),project)
+    else:
+        path = os.getcwd()
+    wc = get_working_copy(path)
     digest = request.GET.get('digest', False)
     main_file = request.GET.get('main_file', False)
     try:

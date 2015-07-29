@@ -23,7 +23,9 @@
             {% for project in projects %}
             <a class="list-group-item" href="/{{project.id}}/">
                 <span class="badge">{{project.record_set.count}} records</span>
-                <h4 class="list-group-item-heading">{{project.get_name}}</h4>
+                <h4 class="list-group-item-heading">
+                    <img src="/static/img/{{project.id}}_logo.png" alt="{{project.get_name}}" style="height:30px"></img>
+                </h4>
                 {% if project.description %}<p class="list-group-item-text">{{project.description|truncatechars:200}}</p>{% endif %}
             </a>
             {% endfor %}
