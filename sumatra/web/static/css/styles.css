@@ -3,11 +3,11 @@ div.container {
 }
 
 .navbar-default .brand-logo {
-background-image: url(/static/img/brand_logo.png);
+background-image: url(/static/images/brand_logo.png);
 }
 
 .navbar-inverse .brand-logo {
-background-image: url(/static/img/brand_logo_inverse.png);
+background-image: url(/static/images/brand_logo_inverse.png);
 }
 
 .brand-logo {

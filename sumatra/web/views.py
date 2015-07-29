@@ -61,7 +61,8 @@ class ProjectDetailView(DetailView):
         return context
 
     def post(self, request, *args, **kwargs):
-        if settings.READ_ONLY: return HttpResponse('Read-only')
+        if settings.READ_ONLY:
+            return HttpResponse('Read-only')
         name = request.POST.get('name', None)
         description = request.POST.get('description', None)
         project = self.get_object()
@@ -113,7 +114,8 @@ class RecordDetailView(DetailView):
         return context
 
     def post(self, request, *args, **kwargs):
-        if settings.READ_ONLY: return HttpResponse('Read-only')
+        if settings.READ_ONLY:
+            return HttpResponse('Read-only')
         record = self.get_object()
         for attr in ("reason", "outcome", "tags"):
             value = request.POST.get(attr, None)
@@ -280,7 +282,8 @@ def image_list(request, project):
 
 
 def delete_records(request, project):
-    if settings.READ_ONLY: return HttpResponse('Read-only')
+    if settings.READ_ONLY:
+        return HttpResponse('Read-only')
     records_to_delete = request.POST.getlist('delete[]')
     delete_data = request.POST.get('delete_data', False)
     if isinstance(delete_data, str):
@@ -385,22 +388,24 @@ class SettingsView(View):
         return HttpResponse(json.dumps(self.load_settings()), content_type='application/json')
 
     def post(self, request):
-        if settings.READ_ONLY: return HttpResponse('Read-only')
-        settings = self.load_settings()
+        import pdb; pdb.set_trace()
+        if settings.READ_ONLY is True:
+            return HttpResponse('Read-only')
+        table_settings = self.load_settings()
         data = json.loads(request.body.decode('utf-8'))
-        settings.update(data["settings"])
-        self.save_settings(settings)
+        table_settings.update(data["settings"])
+        self.save_settings(table_settings)
         return HttpResponse('OK')
 
     def load_settings(self):
         if os.path.exists(global_conf_file):
             with open(global_conf_file, 'r') as fp:
-                settings = json.load(fp)
+                table_settings = json.load(fp)
         else:
-            settings = {
+            table_settings = {
                 "hidden_cols": []
             }
-        return settings
+        return table_settings
 
     def save_settings(self, settings):
         with open(global_conf_file, 'w') as fp:

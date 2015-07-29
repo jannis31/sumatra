@@ -6,6 +6,10 @@
 
 {% block css %}
     <link href="/static/css/dataTables.bootstrap.css" rel="stylesheet">
+    <link href="/static/css/extensions/dataTables.fixedHeader.min.css" rel="stylesheet">
+    <link href="/static/css/extensions/dataTables.colReorder.min.css" rel="stylesheet">
+    <link href="/static/css/extensions/dataTables.colVis.min.css" rel="stylesheet">
+    <link href="/static/css/extensions/dataTables.tableTools.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block navbar %}
@@ -174,6 +178,10 @@
 {% block scripts %}
 <script type="text/javascript" language="javascript" src="/static/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/static/js/dataTables.bootstrap.js"></script>
+<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.fixedHeader.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.colReorder.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.colVis.min.js"></script>
+<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.tableTools.min.js"></script>
 <script type="text/javascript">
 
 /* filter by tag */
@@ -223,10 +231,15 @@ $(document).ready(function() {
     /* initialize DataTable */
     var table = $('#records').DataTable({
         "info": false,
-        "dom": 'ftlp',
+        "dom": 'RTC<"clear">ftlp',
         "order": [[ 1, "desc" ]],
-        "columnDefs": columnDefs
+        "columnDefs": columnDefs,
+        "tableTools": {
+            "sSwfPath": "/static/swf/copy_csv_xls_pdf.swf"
+        },
+        stateSave: true
     });
+    new $.fn.dataTable.FixedHeader( table );
 
     $('#records').find('td:eq(1)').attr('nowrap', 'nowrap');
 
