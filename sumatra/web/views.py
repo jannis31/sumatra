@@ -388,7 +388,6 @@ class SettingsView(View):
         return HttpResponse(json.dumps(self.load_settings()), content_type='application/json')
 
     def post(self, request):
-        import pdb; pdb.set_trace()
         if settings.READ_ONLY is True:
             return HttpResponse('Read-only')
         table_settings = self.load_settings()
