@@ -231,6 +231,9 @@ def parameter_list(request, project):
     main_file = request.GET.get('main_file', None)
     if main_file:
         record_list = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project, main_file=main_file)
+        table_id = 0
+        if len(record_list) > 0:
+            table_id = record_list[0].pk
         keys = []
         for record in record_list:
             try:
@@ -244,7 +247,7 @@ def parameter_list(request, project):
                 keys.sort()
             except:
                 return Http404
-        return render_to_response('parameter_list.html',{'project':project_obj, 'object_list':record_list, 'keys': keys, 'main_file':main_file})
+        return render_to_response('parameter_list.html',{'project':project_obj, 'object_list':record_list, 'keys': keys, 'main_file':main_file, 'id':table_id})
     else:
         return render_to_response('parameter_list.html',{'project':project_obj})
 
