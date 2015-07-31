@@ -82,6 +82,7 @@ var load_images = function() {
                 offset = offset + data.length
                 loading = false; // reset value of loading once content loaded
             }
+            $(".tags .tag[value="+ selected_tag+"]").addClass('active')
 
             /* select tag from dropdown menu */
             $('.tag').click(function () {
