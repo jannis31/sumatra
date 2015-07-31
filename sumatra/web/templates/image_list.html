@@ -56,6 +56,17 @@ var loading= false;
 var offset = 0;
 var limit = 8;
 
+function equalHeight(group) {
+    var tallest = 0;
+    group.each(function() {
+        var thisHeight = $(this).height();
+        if(thisHeight > tallest) {
+            tallest = thisHeight;
+        }
+    });
+    group.each(function() { $(this).height(tallest); });
+}
+
 var load_images = function() {
     $.ajax({
         url: '/{{project.id}}/image',
@@ -104,6 +115,7 @@ var load_images = function() {
                 offset = 0;
                 load_images()
             });
+            equalHeight($(".thumbnail"));
         },
         async: false
     });
