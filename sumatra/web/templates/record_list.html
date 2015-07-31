@@ -19,7 +19,7 @@
                 <ul class="dropdown-menu" role="menu" id="tagList">
                     {% if tags %}
                         {% for tag in tags %}
-                        <li id="id_tag_{{tag.name}}"><a data-target="#" value="{{tag.name}}" class="tags">{{tag.name}}</a></li>
+                        <li id="id_tag_{{tag.name}}"><a data-target="#" value="{{tag.name}}" class="tag">{{tag.name}}</a></li>
                         {% endfor %}
                         <li role="presentation" class="divider"></li>
                         <li ><a data-target="#" value="null" class="tag"><i>clear selection</i></a></li>
@@ -102,7 +102,7 @@
         <td><a target="script_content" onclick="window.open('/{{project.id}}/script?digest={{record.version}}&main_file={{record.main_file}}','script_content','width=640,height=600,scrollbars=yes,resizable=yes')"><span class="glyphicon glyphicon-file"></span></a> {{record.main_file|ubreak}}</td>
         <td title='{{record.version}}'>{{record.version|truncatechars:10}}{% if record.diff %}*{% endif %}</td>
         <td>{{record.script_arguments}}</td>
-        <td id="id_button_tags">{% for tag in record.tag_objects %}<button class="btn btn-default btn-xs tag" value="{{tag}}">{{tag}}</button>{% endfor %}</td>
+        <td id="id_button_tags">{% for tag in record.tag_objects %}<button class="btn btn-default btn-xs tag" value="{{tag}}">{{tag}}</button> {% endfor %}</td>
         <!-- {{record.tags}} -->
     </tr>
     {% endfor %}

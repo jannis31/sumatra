@@ -110,16 +110,15 @@ var load_images = function() {
 };
 
 $(document).ready(function() {
-        $('#nav-image').addClass('active');
+    $('#nav-image').addClass('active');
 
-        load_images()
-        $(window).scroll(function() {
-            if (!loading && ($(window).scrollTop() >  $(document).height() - $(window).height())) {
-                loading= true;
-                load_images()
-            }
-        });
-
-} );
+    load_images()
+    $(window).scroll(function() {
+        if (!loading && ($(window).scrollTop() >  $(document).height() - $(window).height())) {
+            loading= true;
+            load_images()
+        }
+    });
+});
 </script>
 {% endblock %}

@@ -251,15 +251,15 @@ def parameter_list(request, project):
 
 def image_list(request, project):
     project_obj = Project.objects.using(_label_db.get(project,'default')).get(id=project)
-    tags = Tag.objects.using(_label_db.get(project,'default')).all()
-    offset = int(request.GET.get('offset',0))
-    limit = int(request.GET.get('limit',8))
-    selected_tag = request.GET.get('selected_tag',None)
-    if selected_tag:
-        record_all = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project, tags__contains=selected_tag)
-    else:
-        record_all = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project)
     if request.is_ajax():
+        offset = int(request.GET.get('offset',0))
+        limit = int(request.GET.get('limit',8))
+        selected_tag = request.GET.get('selected_tag', 'None')
+        if selected_tag != 'None':
+            record_all = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project, tags__contains=selected_tag)
+        else:
+            record_all = Record.objects.using(_label_db.get(project,'default')).filter(project_id=project)
+
         data = []
         for record in record_all:
             tags = [tag.name for tag in record.tag_objects()]
@@ -279,6 +279,7 @@ def image_list(request, project):
                     })
         return HttpResponse(json.dumps(data[offset:offset+limit]), content_type='application/json')
     else:
+        tags = Tag.objects.using(_label_db.get(project,'default')).all()
         return render_to_response('image_list.html', {'project':project_obj, 'tags':tags})
 
 
