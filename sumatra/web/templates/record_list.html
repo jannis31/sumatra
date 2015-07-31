@@ -191,8 +191,12 @@ var selected_tag = null;
 $.fn.dataTable.ext.search.push(
     function( settings, data, dataIndex ) {
         if (selected_tag) {
-            tags = data[12].split(" ")
-            return tags.indexOf(selected_tag) > -1
+        for (var i in settings.aoColumns) {
+            if (settings.aoColumns[i].sTitle == 'Tags') {
+                var tags = data[settings.aoColumns[i].idx].split(" ")
+            }
+        }
+        return tags.indexOf(selected_tag) > -1
         }
         return true;
     }
