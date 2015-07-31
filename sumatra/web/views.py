@@ -262,6 +262,7 @@ def image_list(request, project):
     if request.is_ajax():
         data = []
         for record in record_all:
+            tags = [tag.name for tag in record.tag_objects()]
             for data_key in record.output_data.all():
                 mimetype, encoding = mimetypes.guess_type(data_key.path)
                 if mimetype in ("image/png", "image/jpeg", "image/gif", "image/x-png"):
@@ -271,7 +272,7 @@ def image_list(request, project):
                         'main_file':        record.main_file,
                         'repos_url':        record.repository.url,
                         'version':          record.version,
-                        'tags':             record.tags,
+                        'tags':             tags,
                         'path':             data_key.path,
                         'creation':         data_key.creation.strftime('%Y-%m-%d %H:%M:%S'),
                         'digest':           data_key.digest

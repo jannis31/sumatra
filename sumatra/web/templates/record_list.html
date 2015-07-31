@@ -22,7 +22,7 @@
                         <li id="id_tag_{{tag.name}}"><a data-target="#" value="{{tag.name}}" class="tags">{{tag.name}}</a></li>
                         {% endfor %}
                         <li role="presentation" class="divider"></li>
-                        <li ><a data-target="#" value="null" class="tags"><i>clear selection</i></a></li>
+                        <li ><a data-target="#" value="null" class="tag"><i>clear selection</i></a></li>
                     {% else %}
                     <li role="presentation" class="dropdown-header">No tags defined.</li>
                     {% endif %}
@@ -102,7 +102,7 @@
         <td><a target="script_content" onclick="window.open('/{{project.id}}/script?digest={{record.version}}&main_file={{record.main_file}}','script_content','width=640,height=600,scrollbars=yes,resizable=yes')"><span class="glyphicon glyphicon-file"></span></a> {{record.main_file|ubreak}}</td>
         <td title='{{record.version}}'>{{record.version|truncatechars:10}}{% if record.diff %}*{% endif %}</td>
         <td>{{record.script_arguments}}</td>
-        <td id="id_button_tags">{% for tag in record.tag_objects %}<button class="btn btn-default btn-xs tags" value="{{tag}}">{{tag}}</button> {% endfor %}</td>
+        <td id="id_button_tags">{% for tag in record.tag_objects %}<button class="btn btn-default btn-xs tag" value="{{tag}}">{{tag}}</button>{% endfor %}</td>
         <!-- {{record.tags}} -->
     </tr>
     {% endfor %}
@@ -304,7 +304,7 @@ $(document).ready(function() {
     });
 
     /* select tag from dropdown menu */
-    $('.tags').click(function () {
+    $('.tag').click(function () {
         if ( selected_tag == $(this).attr('value') ) {
             selected_tag = 'null';
         } else {
@@ -320,8 +320,8 @@ $(document).ready(function() {
             $('#tag-label').html(selected_tag);
         }
         table.draw();
-        $('#id_button_tags .tags').removeClass("active");
-        $('#id_button_tags .tags[value='+ selected_tag+']').addClass("active");
+        $('#id_button_tags .tag').removeClass("active");
+        $('#id_button_tags .tag[value='+ selected_tag+']').addClass("active");
     });
 
     {% if not read_only %}

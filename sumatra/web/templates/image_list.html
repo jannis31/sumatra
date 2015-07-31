@@ -11,10 +11,10 @@
                 <ul class="dropdown-menu" role="menu" id="tagList">
                     {% if tags %}
                         {% for tag in tags %}
-                        <li><a data-target="#">{{tag.name}}</a></li>
+                        <li><a data-target="#" class="tag" value="{{tag.name}}">{{tag.name}}</a></li>
                         {% endfor %}
                         <li role="presentation" class="divider"></li>
-                        <li><a data-target="#"><i>clear selection</i></a></li>
+                        <li><a data-target="#" class="tag" value="null"><i>clear selection</i></a></li>
                     {% else %}
                     <li role="presentation" class="dropdown-header">No tags defined.</li>
                     {% endif %}
@@ -30,8 +30,8 @@
 
 <!-- Page Content -->
     <div class="container">
-        <div class="row" style="margin-top:20px">
-            <div class="col-lg-3 col-md-4 col-xs-6 thumb" style="display:none">
+        <div class="row">
+            <div class="col-md-4 col-xs-6 thumb" style="display:none">
                 <div class="thumbnail">
                     <a class="image"><img class="img-responsive"></a>
                     <div class="caption">
@@ -72,13 +72,37 @@ var load_images = function() {
                 thumb.find('.filename').html(data[i].path);
                 thumb.find('.rec-label').attr('href','/'+data[i].project_name+'/'+data[i].label+'/').html(data[i].label);
                 thumb.find('.show_script').attr('onclick', "window.open('/{{project.id}}/script?path="+data[i].repos_url+"&digest="+data[i].version+"&main_file="+data[i].main_file +"','script_content','width=640,height=600,scrollbars=yes,resizable=yes')").parent().append(' '+data[i].main_file)
-                thumb.find('.tags').html(data[i].tags)
+                for (j in data[i].tags) {
+                    var tag = data[i].tags[j];
+                    thumb.find('.tags').append('<button class="btn btn-default btn-xs tag" value="'+ tag +'">'+ tag +'</button>')
+                }
                 thumb.addClass('loaded').show();
             }
             if (data.length > 0) {
                 offset = offset + data.length
                 loading = false; // reset value of loading once content loaded
             }
+
+            /* select tag from dropdown menu */
+            $('.tag').click(function () {
+                if ( selected_tag == $(this).attr('value') ) {
+                    selected_tag = 'null';
+                } else {
+                    selected_tag = $(this).attr('value');
+                }
+                $('#tagList li').removeClass('selected');
+                $('#tag-label').html('Tag');
+
+                if (selected_tag == 'null') {
+                    selected_tag = null;
+                } else {
+                    $("#tagList #id_tag_"+selected_tag).addClass('selected');
+                    $('#tag-label').html(selected_tag);
+                }
+                $('.loaded').remove();
+                offset = 0;
+                load_images()
+            });
         },
         async: false
     });
@@ -95,24 +119,6 @@ $(document).ready(function() {
             }
         });
 
-    /* select tag from dropdown menu */
-    $('#tagList a').click(function (event) {
-        var target = $(event.target);
-        var li = target.parent();
-        selected_tag = target[0].textContent;
-        if (selected_tag == 'clear selection') {
-            $('#tagList').children().removeClass('selected');
-            selected_tag = null;
-            $('#tag-label').html('Tag');
-        } else {
-            li.addClass('selected').siblings().removeClass('selected');
-            selected_tag = target[0].textContent;
-            $('#tag-label').html(selected_tag);
-        };
-        $('.loaded').remove();
-        offset = 0;
-        load_images()
-    });
 } );
 </script>
 {% endblock %}
