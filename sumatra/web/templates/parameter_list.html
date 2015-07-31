@@ -6,6 +6,7 @@
 
 {% block css %}
     <link href="/static/css/dataTables.bootstrap.css" rel="stylesheet">
+    <link href="/static/css/extensions/dataTables.colReorder.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block navbar %}
@@ -78,6 +79,7 @@
 {% block scripts %}
 <script type="text/javascript" language="javascript" src="/static/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/static/js/dataTables.bootstrap.js"></script>
+<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.colReorder.min.js"></script>
 <script type="text/javascript">
 
 $(document).ready(function() {
@@ -87,7 +89,7 @@ $(document).ready(function() {
     /* initialize DataTable */
     var table = $('#records').DataTable({
         "info": false,
-        "dom": 'ftlp',
+        "dom": 'R<"clear">ftlp',
         "order": [[ 1, "desc" ]],
     });
 
