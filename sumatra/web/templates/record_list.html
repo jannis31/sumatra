@@ -19,10 +19,10 @@
                 <ul class="dropdown-menu" role="menu" id="tagList">
                     {% if tags %}
                         {% for tag in tags %}
-                        <li><a data-target="#">{{tag.name}}</a></li>
+                        <li id="id_tag_{{tag.name}}"><a data-target="#" value="{{tag.name}}" class="tags">{{tag.name}}</a></li>
                         {% endfor %}
                         <li role="presentation" class="divider"></li>
-                        <li><a data-target="#"><i>clear selection</i></a></li>
+                        <li ><a data-target="#" value="null" class="tags"><i>clear selection</i></a></li>
                     {% else %}
                     <li role="presentation" class="dropdown-header">No tags defined.</li>
                     {% endif %}
@@ -42,7 +42,7 @@
 <h3>{{project.name}}</h3>
 {% endif %}
 
-<div class="pull-left" role="group">
+<div role="group">
     {% if not read_only %}
         <button type="button" class="btn btn-danger btn-sm" id="delete" data-toggle="modal" data-target="#deleteModal">
             <span class="glyphicon glyphicon-trash"></span> Delete selected</button>
@@ -102,7 +102,8 @@
         <td><a target="script_content" onclick="window.open('/{{project.id}}/script?digest={{record.version}}&main_file={{record.main_file}}','script_content','width=640,height=600,scrollbars=yes,resizable=yes')"><span class="glyphicon glyphicon-file"></span></a> {{record.main_file|ubreak}}</td>
         <td title='{{record.version}}'>{{record.version|truncatechars:10}}{% if record.diff %}*{% endif %}</td>
         <td>{{record.script_arguments}}</td>
-        <td>{{record.tags}}</td>
+        <td id="id_button_tags">{% for tag in record.tag_objects %}<button class="btn btn-default btn-xs tags" value="{{tag}}">{{tag}}</button> {% endfor %}</td>
+        <!-- {{record.tags}} -->
     </tr>
     {% endfor %}
     <tbody>
@@ -190,11 +191,8 @@ var selected_tag = null;
 $.fn.dataTable.ext.search.push(
     function( settings, data, dataIndex ) {
         if (selected_tag) {
-            var tags = data[12].split(', ');
-            if ( tags.indexOf(selected_tag) > -1 ) {
-                return true;
-            }
-            return false;
+            tags = data[12].split(" ")
+            return tags.indexOf(selected_tag) > -1
         }
         return true;
     }
@@ -302,20 +300,24 @@ $(document).ready(function() {
     });
 
     /* select tag from dropdown menu */
-    $('#tagList a').click(function (event) {
-        var target = $(event.target);
-        var li = target.parent();
-        selected_tag = target[0].textContent;
-        if (selected_tag == 'clear selection') {
-            $('#tagList').children().removeClass('selected');
-            selected_tag = null;
-            $('#tag-label').html('Tag');
+    $('.tags').click(function () {
+        if ( selected_tag == $(this).attr('value') ) {
+            selected_tag = 'null';
         } else {
-            li.addClass('selected').siblings().removeClass('selected');
-            selected_tag = target[0].textContent;
+            selected_tag = $(this).attr('value');
+        }
+        $('#tagList li').removeClass('selected');
+        $('#tag-label').html('Tag');
+
+        if (selected_tag == 'null') {
+            selected_tag = null;
+        } else {
+            $("#tagList #id_tag_"+selected_tag).addClass('selected');
             $('#tag-label').html(selected_tag);
-        };
+        }
         table.draw();
+        $('#id_button_tags .tags').removeClass("active");
+        $('#id_button_tags .tags[value='+ selected_tag+']').addClass("active");
     });
 
     {% if not read_only %}
