@@ -11,7 +11,7 @@ from builtins import str
 
 import parameters
 import mimetypes
-from django.conf import settings
+from django.conf import settings as django_settings
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.views.generic.list import ListView
@@ -23,6 +23,7 @@ except ImportError:  # older versions of Django
 import json
 import os
 from django.views.generic import View, DetailView
+from django.db.models import Q
 from tagging.models import Tag
 from sumatra.recordstore.serialization import datestring_to_datetime
 from sumatra.recordstore.django_store.models import Project, Record, DataKey, Datastore
@@ -60,9 +61,14 @@ class ProjectDetailView(DetailView):
         context['read_only'] = settings.READ_ONLY
         return context
 
+    def get_context_data(self, **kwargs):
+        context = super(ProjectDetailView, self).get_context_data(**kwargs)
+        context['read_only'] = django_settings.READ_ONLY
+        return context
+
     def post(self, request, *args, **kwargs):
-        if settings.READ_ONLY:
-            return HttpResponse('Read-only')
+        if django_settings.READ_ONLY:
+            return HttpResponse('It is in read-only mode.')
         name = request.POST.get('name', None)
         description = request.POST.get('description', None)
         project = self.get_object()
@@ -86,7 +92,7 @@ class RecordListView(ListView):
         context = super(RecordListView, self).get_context_data(**kwargs)
         context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
         context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
-        context['read_only'] = settings.READ_ONLY
+        context['read_only'] = django_settings.READ_ONLY
         return context
 
 
@@ -110,12 +116,12 @@ class RecordDetailView(DetailView):
         if hasattr(parameter_set, "as_dict"):
             parameter_set = parameter_set.as_dict()
         context['parameters'] = parameter_set
-        context['read_only'] = settings.READ_ONLY
+        context['read_only'] = django_settings.READ_ONLY
         return context
 
     def post(self, request, *args, **kwargs):
-        if settings.READ_ONLY:
-            return HttpResponse('Read-only')
+        if django_settings.READ_ONLY:
+            return HttpResponse('It is in read-only mode.')
         record = self.get_object()
         for attr in ("reason", "outcome", "tags"):
             value = request.POST.get(attr, None)
@@ -287,8 +293,8 @@ def image_list(request, project):
 
 
 def delete_records(request, project):
-    if settings.READ_ONLY:
-        return HttpResponse('Read-only')
+    if django_settings.READ_ONLY:
+        return HttpResponse('It is in read-only mode.')
     records_to_delete = request.POST.getlist('delete[]')
     delete_data = request.POST.get('delete_data', False)
     if isinstance(delete_data, str):
@@ -316,7 +322,7 @@ def show_content(request, datastore_id):
         content = datastore.get_content(data_key)
     except (IOError, KeyError):
         raise Http404
-    return HttpResponse(content, content_type=mimetype)
+    return HttpResponse(content, content_type=mimetype or "application/unknown")
 
 
 def show_script(request, project):
@@ -393,9 +399,9 @@ class SettingsView(View):
         return HttpResponse(json.dumps(self.load_settings()), content_type='application/json')
 
     def post(self, request):
-        if settings.READ_ONLY is True:
-            return HttpResponse('Read-only')
-        table_settings = self.load_settings()
+        if django_settings.READ_ONLY:
+            return HttpResponse('It is in read-only mode.')
+        settings = self.load_settings()
         data = json.loads(request.body.decode('utf-8'))
         table_settings.update(data["settings"])
         self.save_settings(table_settings)
