@@ -34,7 +34,7 @@ DEFAULT_MAX_DISPLAY_LENGTH = 10 * 1024
 global_conf_file = os.path.expanduser(os.path.join("~", ".smtrc"))
 mimetypes.init()
 
-_label_db = settings.LABEL_DB
+_label_db = django_settings.LABEL_DB
 
 
 class ProjectListView(ListView):
@@ -44,7 +44,7 @@ class ProjectListView(ListView):
 
     def get_queryset(self):
         projects = []
-        for db in settings.DATABASES.keys():
+        for db in django_settings.DATABASES.keys():
             projects.extend(Project.objects.using(db).all())
         return projects
 
@@ -58,7 +58,7 @@ class ProjectDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
-        context['read_only'] = settings.READ_ONLY
+        context['read_only'] = django_settings.READ_ONLY
         return context
 
     def get_context_data(self, **kwargs):
@@ -286,7 +286,10 @@ def image_list(request, project):
                         'creation':         data_key.creation.strftime('%Y-%m-%d %H:%M:%S'),
                         'digest':           data_key.digest
                     })
-        return HttpResponse(json.dumps(data[offset:offset+limit]), content_type='application/json')
+        if limit != -1:
+            return HttpResponse(json.dumps(data[offset:offset+limit]), content_type='application/json')
+        else:
+            return HttpResponse(json.dumps(data), content_type='application/json')        
     else:
         tags = Tag.objects.using(_label_db.get(project,'default')).all()
         return render_to_response('image_list.html', {'project':project_obj, 'tags':tags})

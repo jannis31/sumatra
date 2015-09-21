@@ -44,6 +44,12 @@
                 </div>
             </div>
         </div>
+        <div class="text-center">
+            <div class="btn-group">
+                <div class="btn btn-default load" onclick="load_images(8)">load more</div>
+                <div class="btn btn-default load" onclick="load_images(-1)">load all</div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 
@@ -52,7 +58,7 @@
 
 /* filter by tag */
 var selected_tag = null;
-var loading= false;
+var loading = false;
 var offset = 0;
 var limit = 8;
 
@@ -67,7 +73,8 @@ function equalHeight(group) {
     group.each(function() { $(this).height(tallest); });
 }
 
-var load_images = function() {
+var load_images = function(limit) {
+    if (limit == -1) { $('.loaded').remove(); }
     $.ajax({
         url: '/{{project.id}}/image',
         type: 'GET',
@@ -90,13 +97,14 @@ var load_images = function() {
                 thumb.addClass('loaded').show();
             }
             if (data.length > 0) {
-                offset = offset + data.length
+                offset = offset + limit
                 loading = false; // reset value of loading once content loaded
             }
             $(".tags .tag[value="+ selected_tag+"]").addClass('active')
 
             /* select tag from dropdown menu */
             $('.tag').click(function () {
+                $('.load').show()
                 if ( selected_tag == $(this).attr('value') ) {
                     selected_tag = 'null';
                 } else {
@@ -113,24 +121,21 @@ var load_images = function() {
                 }
                 $('.loaded').remove();
                 offset = 0;
-                load_images()
+                load_images(limit)
             });
             equalHeight($(".thumbnail"));
+
+            if (limit == -1 || limit > data.length) {$('.load').hide()}
         },
         async: false
     });
 };
 
+
+
 $(document).ready(function() {
     $('#nav-image').addClass('active');
-
-    load_images()
-    $(window).scroll(function() {
-        if (!loading && ($(window).scrollTop() >  $(document).height() - $(window).height())) {
-            loading= true;
-            load_images()
-        }
-    });
+    load_images(limit)
 });
 </script>
 {% endblock %}

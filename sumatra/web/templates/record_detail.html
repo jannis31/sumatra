@@ -73,13 +73,22 @@
         </h4>
     </div>
     <div class="panel-body collapse in" id="parameters-panel">
-    <div class="pull-right" role="group">
-        <a type="button" class="btn btn-warning btn-sm" href="/{{project_name}}/parameter?main_file={{record.main_file}}">
-            <span class="glyphicon glyphicon-transfer"></span> View parameters</a>
-    </div>
-    {% with dict=parameters template="nested_dict.html" %}
-        {% include template %}
-    {% endwith %}
+        <div class="pull-right" role="group">
+            <a type="button" class="btn btn-warning btn-sm" href="/{{project_name}}/parameter?main_file={{record.main_file}}">
+                <span class="glyphicon glyphicon-transfer"></span> View parameters</a>
+        </div>
+        <div class="row">
+            <div class="col-xs-6">
+                {% with dict=parameters template="nested_dict.html" %}
+                    {% include template %}
+                {% endwith %}
+            </div>
+            <div class="col-xs-6">
+                {% with dict=parameters_curr template="nested_dict.html" %}
+                    {% include template %}
+                {% endwith %}
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}
