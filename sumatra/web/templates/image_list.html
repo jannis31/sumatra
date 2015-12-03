@@ -46,6 +46,7 @@
       <th>Output of</th>
       <th>Reason</th>
       <th>Outcome</th>
+      <!-- <th>Parameter</th> -->
       <th>Tags</th>
     </tr>
     </thead>
@@ -63,7 +64,7 @@
         </td>
         <td>
             <a href="/{{project.id}}/data/datafile?path={{data_key.path|urlencode}}&digest={{data_key.digest}}&creation={{data_key.creation|date:"c"}}" title="{{data_key.path|urlencode}}">
-                <img src="/static/{{data_key.path|urlencode}}" style="height:100px">
+                <img src="/static/{{data_key.path|urlencode}}" style="height:200px">
             </a>
         </td>
         <td>
@@ -72,11 +73,14 @@
             </a>
         </td>
         <td>
-            {{data_key.output_from_record.reason|truncatechars:250 }}
+            {{data_key.output_from_record.reason|truncatechars:200 }}
         </td>
         <td>
-            {{data_key.output_from_record.outcome|truncatechars:250 }}
+            {{data_key.output_from_record.outcome|truncatechars:200 }}
         </td>
+        <!-- <td>
+            {{data_key.output_from_record.parameters.to_sumatra }}
+        </td> -->
         <td id="id_button_tags">
             {% for tag in data_key.output_from_record.tag_objects %}
                 <button class="btn btn-default btn-xs tag" value="{{tag}}">{{tag}}</button>
