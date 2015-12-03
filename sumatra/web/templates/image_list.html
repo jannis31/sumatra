@@ -72,11 +72,11 @@
                 {{data_key.output_from_record.label|ubreak}}
             </a>
         </td>
-        <td>
-            {{data_key.output_from_record.reason|truncatechars:200 }}
+        <td title="{{data_key.output_from_record.reason}}">
+            {{data_key.output_from_record.reason|truncatechars:400 }}
         </td>
-        <td>
-            {{data_key.output_from_record.outcome|truncatechars:200 }}
+        <td title="{{data_key.output_from_record.outcome}}">
+            {{data_key.output_from_record.outcome|truncatechars:400 }}
         </td>
         <!-- <td>
             {{data_key.output_from_record.parameters.to_sumatra }}
