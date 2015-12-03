@@ -232,6 +232,23 @@ class DataDetailView(DetailView):
         return template_name
 
 
+class ImageListView(ListView):
+    context_object_name = 'data_keys'
+    template_name = 'image_list.html'
+
+    def get_queryset(self):
+        return DataKey.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .filter(output_from_record__project_id=self.kwargs["project"]) \
+            .filter(metadata__contains='image')
+
+    def get_context_data(self, **kwargs):
+        context = super(ImageListView, self).get_context_data(**kwargs)
+        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
+        context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
+        return context
+
+
 def parameter_list(request, project):
     project_obj = Project.objects.using(_label_db.get(project,'default')).get(id=project)
     main_file = request.GET.get('main_file', None)
@@ -258,7 +275,7 @@ def parameter_list(request, project):
         return render_to_response('parameter_list.html',{'project':project_obj})
 
 
-def image_list(request, project):
+def image_thumbgrid(request, project):
     project_obj = Project.objects.using(_label_db.get(project,'default')).get(id=project)
     if request.is_ajax():
         offset = int(request.GET.get('offset',0))
@@ -272,27 +289,27 @@ def image_list(request, project):
         data = []
         for record in record_all:
             tags = [tag.name for tag in record.tag_objects()]
-            for data_key in record.output_data.all():
-                mimetype, encoding = mimetypes.guess_type(data_key.path)
-                if mimetype in ("image/png", "image/jpeg", "image/gif", "image/x-png"):
-                    data.append({
-                        'project_name':     project_obj.id,
-                        'label':            record.label,
-                        'main_file':        record.main_file,
-                        'repos_url':        record.repository.url,
-                        'version':          record.version,
-                        'tags':             tags,
-                        'path':             data_key.path,
-                        'creation':         data_key.creation.strftime('%Y-%m-%d %H:%M:%S'),
-                        'digest':           data_key.digest
-                    })
+            for data_key in record.output_data.filter(metadata__contains='image'):
+                data.append({
+                    'project_name':     project_obj.id,
+                    'label':            record.label,
+                    'main_file':        record.main_file,
+                    'repos_url':        record.repository.url,
+                    'version':          record.version,
+                    'reason':           record.reason,
+                    'outcome':          record.outcome,
+                    'tags':             tags,
+                    'path':             data_key.path,
+                    'creation':         data_key.creation.strftime('%Y-%m-%d %H:%M:%S'),
+                    'digest':           data_key.digest
+                })
         if limit != -1:
             return HttpResponse(json.dumps(data[offset:offset+limit]), content_type='application/json')
         else:
-            return HttpResponse(json.dumps(data), content_type='application/json')        
+            return HttpResponse(json.dumps(data), content_type='application/json')
     else:
         tags = Tag.objects.using(_label_db.get(project,'default')).all()
-        return render_to_response('image_list.html', {'project':project_obj, 'tags':tags})
+        return render_to_response('image_thumbgrid.html', {'project':project_obj, 'tags':tags})
 
 
 def delete_records(request, project):

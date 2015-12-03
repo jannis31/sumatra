@@ -12,6 +12,7 @@ from sumatra.projects import Project
 from sumatra.records import Record
 from sumatra.web.views import (ProjectListView, ProjectDetailView, RecordListView,
                                RecordDetailView, DataListView, DataDetailView,
+                               ImageListView,
                                SettingsView)
 
 P = {
@@ -26,7 +27,8 @@ urlpatterns = patterns('',
                        (r'^%(project)s/about/$' % P, ProjectDetailView.as_view()),
                        (r'^%(project)s/data/$' % P, DataListView.as_view()),
                        (r'^%(project)s/parameter$' % P, 'sumatra.web.views.parameter_list'),
-                       (r'^%(project)s/image$' % P, 'sumatra.web.views.image_list'),
+                       (r'^%(project)s/image/$' % P, ImageListView.as_view()),
+                       (r'^%(project)s/image/thumbgrid$' % P, 'sumatra.web.views.image_thumbgrid'),                   
                        (r'^%(project)s/delete/$' % P, 'sumatra.web.views.delete_records'),
                        (r'^%(project)s/compare/$' % P, 'sumatra.web.views.compare_records'),
                        (r'^%(project)s/plot$' % P, 'sumatra.web.views.plot_file'),

@@ -81,7 +81,8 @@ $(document).ready(function() {
 
     var table = $('#data-keys').dataTable( {
         "info": false,
-        "dom": 'ftlp',
+        "deferRender": true,
+        // "dom": 'ftlp',
         "order": [[ 4, "desc" ]]
     } );
 

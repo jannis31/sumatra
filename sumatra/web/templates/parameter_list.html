@@ -84,7 +84,7 @@
 
 $(document).ready(function() {
     $('#nav-parameter').addClass('active');
-    
+
     // Setup - add a text input to each footer cell
     $('#records_{{id}} tfoot th').each( function () {
         var title = $('#records_{{id}} thead th').eq( $(this).index() ).text();
@@ -94,7 +94,7 @@ $(document).ready(function() {
     /* initialize DataTable */
     var table = $('#records_{{id}}').DataTable({
         "info": false,
-        "dom": 'R<"clear">ftlp',
+        // "dom": 'R<"clear">ftlp',
         "order": [[ 1, "desc" ]],
         stateSave: true
     });

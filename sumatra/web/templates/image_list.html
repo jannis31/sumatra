@@ -2,7 +2,11 @@
 
 {% load filters %}
 
-{% block title %}{{project.id}}: List of images{% endblock %}
+{% block title %}{{project.id}}: List of data files{% endblock %}
+
+{% block css %}
+    <link href="/static/css/dataTables.bootstrap.css" rel="stylesheet">
+{% endblock %}
 
 {% block navbar %}
             <li class="dropdown">
@@ -11,15 +15,21 @@
                 <ul class="dropdown-menu" role="menu" id="tagList">
                     {% if tags %}
                         {% for tag in tags %}
-                        <li><a data-target="#" class="tag" value="{{tag.name}}">{{tag.name}}</a></li>
+                        <li id="id_tag_{{tag.name}}"><a data-target="#" value="{{tag.name}}" class="tag">{{tag.name}}</a></li>
                         {% endfor %}
                         <li role="presentation" class="divider"></li>
-                        <li><a data-target="#" class="tag" value="null"><i>clear selection</i></a></li>
+                        <li ><a data-target="#" value="null" class="tag"><i>clear selection</i></a></li>
                     {% else %}
                     <li role="presentation" class="dropdown-header">No tags defined.</li>
                     {% endif %}
                 </ul>
             </li>
+
+            <div role="group" class="pull-right" style="margin:-5px">
+                <a href='/{{project.id}}/image/thumbgrid' type="button" class="btn btn-default btn-sm" id="layout">
+                    Switch to thumbgrid view
+                </a>
+            </div>
 {% endblock %}
 
 {% block content %}
@@ -28,114 +38,113 @@
 <h3>{{project.name}}</h3>
 {% endif %}
 
-<!-- Page Content -->
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-3 col-md-4 col-xs-6 thumb" style="display:none">
-                <div class="thumbnail">
-                    <a class="image"><img class="img-responsive"></a>
-                    <div class="caption">
-                        <h4 class="filename"></h4>
-                        <p>Record data: <a class="rec-label"></a></p>
-                        <p>Script: <a target="script_content" class="show_script">
-                        <span class="glyphicon glyphicon-file" style="cursor:pointer" title="show script content"></span></a></p>
-                        <p>Tags: <span class="tags"></span></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="text-center">
-            <div class="btn-group">
-                <div class="btn btn-default load" onclick="load_images(8)">load more</div>
-                <div class="btn btn-default load" onclick="load_images(-1)">load all</div>
-            </div>
-        </div>
-    </div>
+<table id="data-keys" class="table table-striped table-condensed" cellspacing="0" width="100%">
+    <thead>
+    <tr>
+      <th>Date/Time</th>
+      <th>Image</th>
+      <th>Output of</th>
+      <th>Reason</th>
+      <th>Outcome</th>
+      <th>Tags</th>
+    </tr>
+    </thead>
+
+    <tbody>
+
+    {% for data_key in data_keys %}
+    <tr id="{{data_key.digest}}">
+        <td>
+            <span style='display:none;'>
+              <!-- hack for correct sorting -->
+                {{data_key.output_from_record.timestamp|date:"YmdHis"}}
+            </span>
+                {{data_key.output_from_record.timestamp|date:"d/m/Y H:i:s"}}
+        </td>
+        <td>
+            <a href="/{{project.id}}/data/datafile?path={{data_key.path|urlencode}}&digest={{data_key.digest}}&creation={{data_key.creation|date:"c"}}" title="{{data_key.path|urlencode}}">
+                <img src="/static/{{data_key.path|urlencode}}" style="height:100px">
+            </a>
+        </td>
+        <td>
+            <a href="/{{project.id}}/{{data_key.output_from_record.label}}/">
+                {{data_key.output_from_record.label|ubreak}}
+            </a>
+        </td>
+        <td>
+            {{data_key.output_from_record.reason|truncatechars:250 }}
+        </td>
+        <td>
+            {{data_key.output_from_record.outcome|truncatechars:250 }}
+        </td>
+        <td id="id_button_tags">
+            {% for tag in data_key.output_from_record.tag_objects %}
+                <button class="btn btn-default btn-xs tag" value="{{tag}}">{{tag}}</button>
+            {% endfor %}
+        </td>
+    </tr>
+    {% endfor %}
+
+    <tbody>
+</table>
+
 {% endblock %}
 
 {% block scripts %}
-<script type="text/javascript">
+    <script type="text/javascript" language="javascript" src="/static/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" language="javascript" src="/static/js/dataTables.bootstrap.js"></script>
+    <script type="text/javascript">
 
 /* filter by tag */
 var selected_tag = null;
-var loading = false;
-var offset = 0;
-var limit = 8;
 
-function equalHeight(group) {
-    var tallest = 0;
-    group.each(function() {
-        var thisHeight = $(this).height();
-        if(thisHeight > tallest) {
-            tallest = thisHeight;
+$.fn.dataTable.ext.search.push(
+    function( settings, data, dataIndex ) {
+        if (selected_tag) {
+        for (var i in settings.aoColumns) {
+            if (settings.aoColumns[i].sTitle == 'Tags') {
+                var tags = data[settings.aoColumns[i].idx].split(" ")
+            }
         }
-    });
-    group.each(function() { $(this).height(tallest); });
-}
-
-var load_images = function(limit) {
-    if (limit == -1) { $('.loaded').remove(); }
-    $.ajax({
-        url: '/{{project.id}}/image',
-        type: 'GET',
-        data: selected_tag ? {'offset': offset, 'limit': limit, 'selected_tag':selected_tag} : {'offset': offset, 'limit': limit},
-        dataType: "json",
-        complete: function(data){
-            data = data.responseJSON
-            for (var i in data) {
-                var thumb = $('.thumb:last-child')
-                thumb.clone().appendTo( ".row" );
-                thumb.find('.image').attr('href', '/'+data[i].project_name+'/data/datafile?path='+data[i].path+'&digest='+data[i].digest+'&creation='+data[i].creation);
-                thumb.find('.image img').attr('src', '/static/'+data[i].path);
-                thumb.find('.filename').html(data[i].path);
-                thumb.find('.rec-label').attr('href','/'+data[i].project_name+'/'+data[i].label+'/').html(data[i].label);
-                thumb.find('.show_script').attr('onclick', "window.open('/{{project.id}}/script?path="+data[i].repos_url+"&digest="+data[i].version+"&main_file="+data[i].main_file +"','script_content','width=640,height=600,scrollbars=yes,resizable=yes')").parent().append(' '+data[i].main_file)
-                for (j in data[i].tags) {
-                    var tag = data[i].tags[j];
-                    thumb.find('.tags').append('<button class="btn btn-default btn-xs tag" value="'+ tag +'">'+ tag +'</button>')
-                }
-                thumb.addClass('loaded').show();
-            }
-            if (data.length > 0) {
-                offset = offset + limit
-                loading = false; // reset value of loading once content loaded
-            }
-            $(".tags .tag[value="+ selected_tag+"]").addClass('active')
-
-            /* select tag from dropdown menu */
-            $('.tag').click(function () {
-                $('.load').show()
-                if ( selected_tag == $(this).attr('value') ) {
-                    selected_tag = 'null';
-                } else {
-                    selected_tag = $(this).attr('value');
-                }
-                $('#tagList li').removeClass('selected');
-                $('#tag-label').html('Tag');
-
-                if (selected_tag == 'null') {
-                    selected_tag = null;
-                } else {
-                    $("#tagList #id_tag_"+selected_tag).addClass('selected');
-                    $('#tag-label').html(selected_tag);
-                }
-                $('.loaded').remove();
-                offset = 0;
-                load_images(limit)
-            });
-            equalHeight($(".thumbnail"));
-
-            if (limit == -1 || limit > data.length) {$('.load').hide()}
-        },
-        async: false
-    });
-};
-
-
+        return tags.indexOf(selected_tag) > -1
+        }
+        return true;
+    }
+);
 
 $(document).ready(function() {
     $('#nav-image').addClass('active');
-    load_images(limit)
-});
-</script>
+
+    var table = $('#data-keys').dataTable( {
+        "info": false,
+        "deferRender": true,
+        // "dom": 'ftlp',
+        "order": [[ 0, "desc" ]]
+    } );
+
+    $('#data-keys tbody').on( 'click', 'tr', function () {
+        $(this).toggleClass('info');
+    } );
+    /* select tag from dropdown menu */
+    $('.tag').click(function () {
+        if ( selected_tag == $(this).attr('value') ) {
+            selected_tag = 'null';
+        } else {
+            selected_tag = $(this).attr('value');
+        }
+        $('#tagList li').removeClass('selected');
+        $('#tag-label').html('Tag');
+
+        if (selected_tag == 'null') {
+            selected_tag = null;
+        } else {
+            $("#tagList #id_tag_"+selected_tag).addClass('selected');
+            $('#tag-label').html(selected_tag);
+        }
+        table.fnDraw();
+        $('#id_button_tags .tag').removeClass("active");
+        $('#id_button_tags .tag[value='+ selected_tag+']').addClass("active");
+    });
+} );
+    </script>
 {% endblock %}

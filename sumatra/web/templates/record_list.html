@@ -6,10 +6,8 @@
 
 {% block css %}
     <link href="/static/css/dataTables.bootstrap.css" rel="stylesheet">
-    <link href="/static/css/extensions/dataTables.fixedHeader.min.css" rel="stylesheet">
-    <link href="/static/css/extensions/dataTables.colReorder.min.css" rel="stylesheet">
-    <link href="/static/css/extensions/dataTables.colVis.min.css" rel="stylesheet">
-    <link href="/static/css/extensions/dataTables.tableTools.min.css" rel="stylesheet">
+    <!-- <link href="/static/css/extensions/dataTables.fixedHeader.min.css" rel="stylesheet">
+    <link href="/static/css/extensions/dataTables.colReorder.min.css" rel="stylesheet"> -->
 {% endblock %}
 
 {% block navbar %}
@@ -28,6 +26,15 @@
                     {% endif %}
                 </ul>
             </li>
+
+            <div role="group" class="pull-right" style="margin:-5px">
+                {% if not read_only %}
+                    <button type="button" class="btn btn-danger btn-sm" id="delete" data-toggle="modal" data-target="#deleteModal">
+                        <span class="glyphicon glyphicon-trash"></span> Delete selected</button>
+                {% endif %}
+                <button type="button" class="btn btn-warning btn-sm" id="compare">
+                    <span class="glyphicon glyphicon-transfer"></span> Compare selected</button>
+            </div>
 {% endblock %}
 
 {% block navbar-right %}
@@ -41,15 +48,6 @@
 {% if project.name %}
 <h3>{{project.name}}</h3>
 {% endif %}
-
-<div role="group">
-    {% if not read_only %}
-        <button type="button" class="btn btn-danger btn-sm" id="delete" data-toggle="modal" data-target="#deleteModal">
-            <span class="glyphicon glyphicon-trash"></span> Delete selected</button>
-    {% endif %}
-    <button type="button" class="btn btn-warning btn-sm" id="compare">
-        <span class="glyphicon glyphicon-transfer"></span> Compare selected</button>
-</div>
 
 <table id="records" class="table table-striped table-condensed" cellspacing="0" width="100%">
 <!-- <table id="records" class="display" cellspacing="0" width="100%"> -->
@@ -180,10 +178,8 @@
 {% block scripts %}
 <script type="text/javascript" language="javascript" src="/static/js/jquery.dataTables.min.js"></script>
 <script type="text/javascript" language="javascript" src="/static/js/dataTables.bootstrap.js"></script>
-<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.fixedHeader.min.js"></script>
-<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.colReorder.min.js"></script>
-<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.colVis.min.js"></script>
-<script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.tableTools.min.js"></script>
+<!-- <script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.fixedHeader.min.js"></script> -->
+<!-- <script type="text/javascript" language="javascript" src="/static/js/extensions/dataTables.colReorder.js"></script> -->
 <script type="text/javascript">
 
 /* filter by tag */
@@ -233,16 +229,19 @@ $(document).ready(function() {
 
     /* initialize DataTable */
     var table = $('#records').DataTable({
-        "info": false,
-        "dom": 'RTC<"clear">ftlp',
-        "order": [[ 1, "desc" ]],
-        "columnDefs": columnDefs,
-        "tableTools": {
-            "sSwfPath": "/static/swf/copy_csv_xls_pdf.swf"
-        },
+        // "serverSide":       true,
+        "info":             false,
+        "deferRender":      true,
+        // "colReorder":       true,
+        "order":            [[ 1, "desc" ]],
+        "columnDefs":       columnDefs,
+        // "dom": 'ftlp',
+        // "tableTools": {
+        //     "sSwfPath": "/static/swf/copy_csv_xls_pdf.swf"
+        // },
         stateSave: true
     });
-    new $.fn.dataTable.FixedHeader( table );
+    // new $.fn.dataTable.FixedHeader( table );
 
     $('#records').find('td:eq(1)').attr('nowrap', 'nowrap');
 
