@@ -26,8 +26,9 @@
             </li>
 
             <div role="group" class="pull-right" style="margin:-5px">
+				<button class="btn btn-default btn-sm active"><span class="glyphicon glyphicon-th-list"></span></button>
                 <a href='/{{project.id}}/image/thumbgrid' type="button" class="btn btn-default btn-sm" id="layout">
-                    Switch to thumbgrid view
+                    <span class="glyphicon glyphicon-th"></span>
                 </a>
             </div>
 {% endblock %}
@@ -64,7 +65,7 @@
         </td>
         <td>
             <a href="/{{project.id}}/data/datafile?path={{data_key.path|urlencode}}&digest={{data_key.digest}}&creation={{data_key.creation|date:"c"}}" title="{{data_key.path|urlencode}}">
-                <img src="/static/{{data_key.path|urlencode}}" style="height:200px">
+                <img src="/static/{{data_key.path|urlencode}}" style="width:250px">
             </a>
         </td>
         <td>
