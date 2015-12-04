@@ -82,38 +82,51 @@ class ProjectDetailView(DetailView):
 
 
 class RecordListView(ListView):
-    context_object_name = 'records'
+    context_object_name = 'project'
     template_name = 'record_list.html'
 
     def get_queryset(self):
-        return Record.objects.using(_label_db.get(self.kwargs["project"],'default')).filter(project__id=self.kwargs["project"]).order_by('-timestamp')
+        return Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
 
     def get_context_data(self, **kwargs):
         context = super(RecordListView, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
         context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
         context['read_only'] = django_settings.READ_ONLY
         return context
 
 def ajax_record(request, project):
 
-    records = Record.objects.using(_label_db.get(project,'default')).filter(project__id=project)
+    print(request.GET.items())
 
     columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
      'duration', 'launch_mode', 'executable', 'main_file', 'version', 'script_arguments', 'tags']
-    draw = int(request.GET['draw'])
-    length = int(request.GET['length'])
-    start = int(request.GET['start'])
+    selected_tag = request.GET['tag']
+    search_value = request.GET['search[value]']
     order = int(request.GET['order[0][column]'])
     order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
-    import pprint
-    pprint.pprint(dict(request.GET.items()))
-    print(start,length,order)
+    length = int(request.GET['length'])
+    start = int(request.GET['start'])
+    draw = int(request.GET['draw'])
 
-    records_filtered = records.order_by(order_dir+columns[order])[start:start+length]
+    records = Record.objects.using(_label_db.get(project,'default')).filter(project__id=project)
+    records_filtered = records
+    if selected_tag != '':
+        records_filtered = records_filtered.filter(tags__contains=selected_tag)
+    if search_value != '':
+        sq_list = search_value.split(' ')
+        for sq in sq_list:
+            records_filtered = records_filtered.filter(
+                Q(label__contains=sq) |
+                Q(reason__contains=sq) |
+                Q(outcome__contains=sq) |
+                Q(duration__contains=sq) |
+                Q(version__contains=sq) |
+                Q(tags__contains=sq)
+                )
+    records_filtered = records_filtered.order_by(order_dir+columns[order])
 
     data = []
-    for rec in records_filtered:
+    for rec in records_filtered[start:start+length]:
         data.append([
         '<a href="/%s/%s/">%s</a>' % (project, rec.label, rec.label),
         '<span style="display:none">%s</span>%s' % (rec.timestamp.strftime('%Y%m%d%H%M%S'),rec.timestamp.strftime('%d/%m/%Y %H:%M:%S')),
@@ -125,9 +138,9 @@ def ajax_record(request, project):
         '%s' % rec.launch_mode.get_parameters().get('n',1),
         '%s' % rec.executable.name,
         '%s' % rec.main_file,
-        '<span title="%s">%s</span>' % (rec.version,rec.version[:7]),# ['','*'][rec.diff]),
+        '<span title="%s">%s</span>' % (rec.version,rec.version[:5]),# ['','*'][rec.diff]),
         '%s' % rec.script_arguments,
-        ' '.join(map(lambda tag: '<button class="btn btn-default btn-xs">%s</button>' %tag, rec.tags.split(' ')))
+        ' '.join(map(lambda tag: '<button class="btn btn-default btn-xs">%s</button>' %tag, rec.tags.split(',')))
         ])
     # import pdb;pdb.set_trace()
 

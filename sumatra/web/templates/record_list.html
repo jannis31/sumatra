@@ -68,27 +68,8 @@
         <th>Tags</th>
     </tr>
     </thead>
-
     <tbody>
     </tbody>
-
-    <tfoot>
-        <tr>
-            <th>Label</th>
-            <th>Date/Time</th>
-            <th>Reason</th>
-            <th>Outcome</th>
-            <th>Input&nbsp;data</th>
-            <th>Output&nbsp;data</th>
-            <th>Duration</th>
-            <th>Processes</th>
-            <th>Executable</th>
-            <th>Main</th>
-            <th>Version</th>
-            <th>Arguments</th>
-            <th>Tags</th>
-        </tr>
-    </tfoot>
 </table>
 
 {% endblock %}
@@ -215,7 +196,12 @@ $(document).ready(function() {
     var table = $('#records').DataTable({
         "processing":       true,
         "serverSide":       true,
-        "ajax":             "/{{project.id}}/ajax/record",
+        "ajax": {
+            "url": "/{{project.id}}/ajax/record",
+            "data": function ( d ) {
+                d.tag = selected_tag;
+            }
+        },
         // "info":             false,
         // "deferRender":      true,
         // // "colReorder":       true,
