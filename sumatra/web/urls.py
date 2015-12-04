@@ -28,7 +28,7 @@ urlpatterns = patterns('',
                        (r'^%(project)s/data/$' % P, DataListView.as_view()),
                        (r'^%(project)s/parameter$' % P, 'sumatra.web.views.parameter_list'),
                        (r'^%(project)s/image/$' % P, ImageListView.as_view()),
-                       (r'^%(project)s/image/thumbgrid$' % P, 'sumatra.web.views.image_thumbgrid'),                   
+                       (r'^%(project)s/image/thumbgrid$' % P, 'sumatra.web.views.image_thumbgrid'),
                        (r'^%(project)s/delete/$' % P, 'sumatra.web.views.delete_records'),
                        (r'^%(project)s/compare/$' % P, 'sumatra.web.views.compare_records'),
                        (r'^%(project)s/plot$' % P, 'sumatra.web.views.plot_file'),
@@ -36,6 +36,7 @@ urlpatterns = patterns('',
                        (r'^%(project)s/data/datafile$' % P, DataDetailView.as_view()),
                        (r'^%(project)s/script$' % P, 'sumatra.web.views.show_script'),
                        (r'^%(project)s/data/(?P<datastore_id>\d+)$', 'sumatra.web.views.show_content'),
+                       (r'^%(project)s/ajax/record$' % P, 'sumatra.web.views.ajax_record'),                       
                        )
 
 urlpatterns += staticfiles_urlpatterns()

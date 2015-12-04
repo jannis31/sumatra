@@ -95,6 +95,53 @@ class RecordListView(ListView):
         context['read_only'] = django_settings.READ_ONLY
         return context
 
+def ajax_record(request, project):
+
+    records = Record.objects.using(_label_db.get(project,'default')).filter(project__id=project)
+
+    columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
+     'duration', 'launch_mode', 'executable', 'main_file', 'version', 'script_arguments', 'tags']
+    draw = int(request.GET['draw'])
+    length = int(request.GET['length'])
+    start = int(request.GET['start'])
+    order = int(request.GET['order[0][column]'])
+    order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
+    import pprint
+    pprint.pprint(dict(request.GET.items()))
+    print(start,length,order)
+
+    records_filtered = records.order_by(order_dir+columns[order])[start:start+length]
+
+    data = []
+    for rec in records_filtered:
+        data.append([
+        '<a href="/%s/%s/">%s</a>' % (project, rec.label, rec.label),
+        '<span style="display:none">%s</span>%s' % (rec.timestamp.strftime('%Y%m%d%H%M%S'),rec.timestamp.strftime('%d/%m/%Y %H:%M:%S')),
+        '<span title="%s">%s</span>' % (rec.reason,rec.reason[:20]),
+        '<span title="%s">%s</span>' % (rec.outcome,rec.outcome[:20]),
+        ' '.join(map(lambda x: x.path, rec.input_data.all())),
+        ' '.join(map(lambda x: x.path, rec.output_data.all())),
+        '<span style="display:none">%f</span>%.2fs' % (rec.duration,rec.duration),
+        '%s' % rec.launch_mode.get_parameters().get('n',1),
+        '%s' % rec.executable.name,
+        '%s' % rec.main_file,
+        '<span title="%s">%s</span>' % (rec.version,rec.version[:7]),# ['','*'][rec.diff]),
+        '%s' % rec.script_arguments,
+        ' '.join(map(lambda tag: '<button class="btn btn-default btn-xs">%s</button>' %tag, rec.tags.split(' ')))
+        ])
+    # import pdb;pdb.set_trace()
+
+    json_test = json.dumps({
+        "draw": draw,
+        "recordsTotal": len(records),
+        "recordsFiltered": len(records),
+        "data": data
+        })
+    return HttpResponse(
+                    json_test,
+                    content_type="application/json"
+    )
+
 
 def unescape(label):
     return label.replace("||", "/")

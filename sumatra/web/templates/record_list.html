@@ -53,7 +53,7 @@
 <!-- <table id="records" class="display" cellspacing="0" width="100%"> -->
     <thead>
     <tr>
-        <th>Label</th>
+        <th id="label">Label</th>
         <th>Date/Time</th>
         <th>Reason</th>
         <th>Outcome</th>
@@ -70,41 +70,25 @@
     </thead>
 
     <tbody>
-    {% for record in records %}
-    <tr id='{{record.label}}'>
-        <td><a href="/{{project.id}}/{{record.label}}/">{{record.label|ubreak}}</a></td>
-        <td>
-        <span style='display:none;'>
-          <!-- hack for correct sorting -->
-          {{record.timestamp|date:"YmdHis"}}
-        </span>
-            {{record.timestamp|date:"d/m/Y H:i:s"}}
-        </td>
-        <td title='{{record.reason}}'>{{record.reason|truncatechars:20}}</td>
-        <td title='{{record.outcome}}'>{{record.outcome|truncatechars:20}}</td>
-        <td>
-            {% for data in record.input_data.all %}
-            <a href="/{{project.id}}/data/datafile?path={{data.path|urlencode}}&digest={{data.digest}}&creation={{data.creation|date:"c"}}">
-                {{data.path|basename|ubreak}}</a>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </td>
-        <td>
-            {% for data in record.output_data.all %}
-            <a href="/{{project.id}}/data/datafile?path={{data.path|urlencode}}&digest={{data.digest}}&creation={{data.creation|date:"c"}}">
-                {{data.path|basename|ubreak}}</a>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </td>
-        <td>{{record.duration|human_readable_duration}}</td>
-        <td>{{record.launch_mode.get_parameters.n|default:"1"}}</td>
-        <td>{{record.executable.name}} {{record.executable.version}}</td>
-        <td><a target="script_content" onclick="window.open('/{{project.id}}/script?digest={{record.version}}&main_file={{record.main_file}}','script_content','width=640,height=600,scrollbars=yes,resizable=yes')"><span class="glyphicon glyphicon-file"></span></a> {{record.main_file|ubreak}}</td>
-        <td title='{{record.version}}'>{{record.version|truncatechars:10}}{% if record.diff %}*{% endif %}</td>
-        <td>{{record.script_arguments}}</td>
-        <td id="id_button_tags">{% for tag in record.tag_objects %}<button class="btn btn-default btn-xs tag" value="{{tag}}">{{tag}}</button> {% endfor %}</td>
-        <!-- {{record.tags}} -->
-    </tr>
-    {% endfor %}
-    <tbody>
+    </tbody>
+
+    <tfoot>
+        <tr>
+            <th>Label</th>
+            <th>Date/Time</th>
+            <th>Reason</th>
+            <th>Outcome</th>
+            <th>Input&nbsp;data</th>
+            <th>Output&nbsp;data</th>
+            <th>Duration</th>
+            <th>Processes</th>
+            <th>Executable</th>
+            <th>Main</th>
+            <th>Version</th>
+            <th>Arguments</th>
+            <th>Tags</th>
+        </tr>
+    </tfoot>
 </table>
 
 {% endblock %}
@@ -229,16 +213,14 @@ $(document).ready(function() {
 
     /* initialize DataTable */
     var table = $('#records').DataTable({
-        // "serverSide":       true,
-        "info":             false,
-        "deferRender":      true,
-        // "colReorder":       true,
+        "processing":       true,
+        "serverSide":       true,
+        "ajax":             "/{{project.id}}/ajax/record",
+        // "info":             false,
+        // "deferRender":      true,
+        // // "colReorder":       true,
         "order":            [[ 1, "desc" ]],
         "columnDefs":       columnDefs,
-        // "dom": 'ftlp',
-        // "tableTools": {
-        //     "sSwfPath": "/static/swf/copy_csv_xls_pdf.swf"
-        // },
         stateSave: true
     });
     // new $.fn.dataTable.FixedHeader( table );
