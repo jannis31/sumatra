@@ -265,6 +265,8 @@ class DjangoRecordStore(RecordStore):
 
     def list(self, project_name, tags=None, number=None, reverse=False, *args, **kwargs):
         db_records = self._manager.filter(project__id=project_name, *args, **kwargs).select_related()
+        if number:
+            db_records = db_records[len(db_records)-int(number):]
         if reverse:
             db_records = db_records.reverse()
         if tags:
@@ -272,8 +274,6 @@ class DjangoRecordStore(RecordStore):
                 tags = [tags]
             for tag in tags:
                 db_records = db_records.filter(tags__contains=tag)
-        if number:
-            db_records = db_records[len(db_records)-int(number):]
         try:
             records = [db_record.to_sumatra() for db_record in db_records]
         except Exception as err:
