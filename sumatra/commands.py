@@ -442,7 +442,6 @@ def list(argv):  # add 'report' and 'log' as aliases
                         help="write list record labels in .smt/labels")
 
     args = parser.parse_args(argv)
-    print(args)
 
     project = load_project()
     if args.write_labels:
