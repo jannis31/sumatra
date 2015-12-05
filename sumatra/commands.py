@@ -438,14 +438,18 @@ def list(argv):  # add 'report' and 'log' as aliases
     #parser.add_argument('-k', '--keyword', metavar='KW', default=None,  help="additional information to label")
     parser.add_argument('-o', '--output_files', action="store_const", const="output_files",
                         dest="mode", help="list output files")
+    parser.add_argument('-w', '--write_labels', action="store_true", dest="write_labels", default=False,
+                        help="write list record labels in .smt/labels")
+
     args = parser.parse_args(argv)
     print(args)
 
     project = load_project()
-    # if os.path.exists('.smt'):
-    #     f = open('.smt/labels', 'w')
-    #     f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
-    #     f.close()
+    if args.write_labels:
+        if os.path.exists('.smt'):
+            f = open('.smt/labels', 'w')
+            f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
+            f.close()
     kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'number':args.number,
         'params_filter': args.params_filter, 'reverse':args.reverse}
 
