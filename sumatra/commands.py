@@ -427,7 +427,7 @@ def list(argv):  # add 'report' and 'log' as aliases
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
                         help="list records in reverse order (default: newest first)")
     parser.add_argument('-m', '--main_file', help="the name of the script for filtering list of records.")
-    parser.add_argument('-n', '--number', help="display the last <n> amounts of records")
+    parser.add_argument('-n', '--number', help="display the last <number> of records")
     parser.add_argument('-d', '--date',
                         dest='timestamp', help="the date (YYYY-MM-DD) for filtering list of records. ")
     parser.add_argument('-v', '--version', metavar='REV',
