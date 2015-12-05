@@ -442,10 +442,10 @@ def list(argv):  # add 'report' and 'log' as aliases
     print(args)
 
     project = load_project()
-    if os.path.exists('.smt'):
-        f = open('.smt/labels', 'w')
-        f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
-        f.close()
+    # if os.path.exists('.smt'):
+    #     f = open('.smt/labels', 'w')
+    #     f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
+    #     f.close()
     kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'number':args.number,
         'params_filter': args.params_filter, 'reverse':args.reverse}
 
