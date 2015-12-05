@@ -18,6 +18,7 @@ from textwrap import dedent
 import warnings
 import logging
 import sumatra
+import datetime
 
 from sumatra.programs import get_executable
 from sumatra.datastore import get_data_store
@@ -426,6 +427,8 @@ def list(argv):  # add 'report' and 'log' as aliases
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
                         help="list records in reverse order (default: newest first)")
     parser.add_argument('-m', '--main_file', help="the name of the script for filtering list of records.")
+    parser.add_argument('-d', '--date', default='all',
+                        dest='timestamp', help="the date (YYYY-MM-DD) for filtering list of records. ")
     parser.add_argument('-v', '--version', metavar='REV',
                         help="use version REV of the code. The first 5 characters is sufficent for filtering list of records.")
     parser.add_argument('-p', '--parameter_view', action="store_const", const="parameter_view",
@@ -442,6 +445,20 @@ def list(argv):  # add 'report' and 'log' as aliases
         f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
         f.close()
     kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'params_filter': args.params_filter, 'reverse':args.reverse}
+
+    if 'timestamp' in args:
+        if ' - ' in args.timestamp:
+            date1,date2 = args.timestamp.split(' - ')
+            kwargs['timestamp__range'] = [date1, datetime.datetime.strptime(date2, '%Y-%m-%d')+datetime.timedelta(1)]
+        elif args.timestamp.endswith(' -'):
+            kwargs['timestamp__range'] = [args.timestamp[:-2], datetime.datetime.now()]
+        elif args.timestamp == 'today':
+            today = datetime.datetime.today()
+            kwargs['timestamp__range'] = [today, today+datetime.timedelta(1)]
+        elif args.timestamp != 'all':
+            date = datetime.datetime.strptime(args.timestamp, '%Y-%m-%d')
+            kwargs['timestamp__range'] = [args.timestamp, date+datetime.timedelta(1)]
+
     if args.main_file is not None: kwargs['main_file__startswith'] = args.main_file
     if args.version is not None: kwargs['version__startswith'] = args.version
     print(project.format_records(**kwargs))
