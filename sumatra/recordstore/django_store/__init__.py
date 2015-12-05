@@ -264,7 +264,7 @@ class DjangoRecordStore(RecordStore):
         return db_record.to_sumatra()
 
     def list(self, project_name, tags=None, number=None, reverse=False, *args, **kwargs):
-        db_records = self._manager.filter(project__id=project_name, *args, **kwargs) #.select_related()
+        db_records = self._manager.filter(project__id=project_name, *args, **kwargs).select_related()
         if reverse:
             db_records = db_records.reverse()
         if tags:
