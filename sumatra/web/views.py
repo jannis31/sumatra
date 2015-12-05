@@ -94,68 +94,6 @@ class RecordListView(ListView):
         context['read_only'] = django_settings.READ_ONLY
         return context
 
-def ajax_record(request, project):
-
-    print(request.GET.items())
-
-    columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
-     'duration', 'launch_mode', 'executable', 'main_file', 'version', 'script_arguments', 'tags']
-    selected_tag = request.GET['tag']
-    search_value = request.GET['search[value]']
-    order = int(request.GET['order[0][column]'])
-    order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
-    length = int(request.GET['length'])
-    start = int(request.GET['start'])
-    draw = int(request.GET['draw'])
-
-    records = Record.objects.using(_label_db.get(project,'default')).filter(project__id=project)
-    records_filtered = records
-    if selected_tag != '':
-        records_filtered = records_filtered.filter(tags__contains=selected_tag)
-    if search_value != '':
-        sq_list = search_value.split(' ')
-        for sq in sq_list:
-            records_filtered = records_filtered.filter(
-                Q(label__contains=sq) |
-                Q(reason__contains=sq) |
-                Q(outcome__contains=sq) |
-                Q(duration__contains=sq) |
-                Q(version__contains=sq) |
-                Q(tags__contains=sq)
-                )
-    records_filtered = records_filtered.order_by(order_dir+columns[order])
-
-    data = []
-    for rec in records_filtered[start:start+length]:
-        data.append([
-        '<a href="/%s/%s/">%s</a>' % (project, rec.label, rec.label),
-        '<span style="display:none">%s</span>%s' % (rec.timestamp.strftime('%Y%m%d%H%M%S'),rec.timestamp.strftime('%d/%m/%Y %H:%M:%S')),
-        '<span title="%s">%s</span>' % (rec.reason,rec.reason[:20]),
-        '<span title="%s">%s</span>' % (rec.outcome,rec.outcome[:20]),
-        ' '.join(map(lambda x: x.path, rec.input_data.all())),
-        ' '.join(map(lambda x: x.path, rec.output_data.all())),
-        '<span style="display:none">%f</span>%.2fs' % (rec.duration,rec.duration),
-        '%s' % rec.launch_mode.get_parameters().get('n',1),
-        '%s' % rec.executable.name,
-        '%s' % rec.main_file,
-        '<span title="%s">%s</span>' % (rec.version,rec.version[:5]),# ['','*'][rec.diff]),
-        '%s' % rec.script_arguments,
-        ' '.join(map(lambda tag: '<button class="btn btn-default btn-xs">%s</button>' %tag, rec.tags.split(',')))
-        ])
-    # import pdb;pdb.set_trace()
-
-    json_test = json.dumps({
-        "draw": draw,
-        "recordsTotal": len(records),
-        "recordsFiltered": len(records),
-        "data": data
-        })
-    return HttpResponse(
-                    json_test,
-                    content_type="application/json"
-    )
-
-
 def unescape(label):
     return label.replace("||", "/")
 
@@ -307,6 +245,80 @@ class ImageListView(ListView):
         context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
         context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
         return context
+
+
+def datatable_record(request, project):
+
+    print(request.GET.items())
+
+    columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
+     'duration', 'launch_mode', 'executable', 'main_file', 'version', 'script_arguments', 'tags']
+    selected_tag = request.GET['tag']
+    search_value = request.GET['search[value]']
+    order = int(request.GET['order[0][column]'])
+    order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
+    length = int(request.GET['length'])
+    start = int(request.GET['start'])
+    draw = int(request.GET['draw'])
+
+    records = Record.objects.using(_label_db.get(project,'default')).filter(project__id=project)
+    recordsTotal = len(records)
+
+    # Filter by tag
+    if selected_tag != '':
+        records = records.filter(tags__contains=selected_tag)
+
+    # Filter by search queries
+    if search_value != '':
+        search_queries = search_value.split(' ')
+        for sq in search_queries:
+            records = records.filter(
+                Q(label__contains=sq) |
+                Q(reason__contains=sq) |
+                Q(outcome__contains=sq) |
+                Q(duration__contains=sq) |
+                Q(main_file__contains=sq) |
+                Q(version__contains=sq) |
+                Q(tags__contains=sq)
+                )
+
+    records = records.order_by(order_dir+columns[order])                        # Ordering
+
+    data = []
+    for rec in records[start:start+length]:
+        data.append([
+            '<a href="/%s/%s/">%s</a>' % (project, rec.label, rec.label),
+            '<span style="display:none">%s</span>%s' % (rec.timestamp.strftime('%Y%m%d%H%M%S'),rec.timestamp.strftime('%d/%m/%Y %H:%M:%S')),
+            '<span title="%s">%s</span>' % (rec.reason,rec.reason[:20]),
+            '<span title="%s">%s</span>' % (rec.outcome,rec.outcome[:20]),
+            ' '.join(map(lambda x: '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
+                %(project,x.path,x.digest,x.creation,x.path), rec.input_data.all())),
+            ' '.join(map(lambda x: '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
+                %(project,x.path,x.digest,x.creation,x.path), rec.output_data.all())),
+            '<span style="display:none">%f</span>%.2fs' % (rec.duration,rec.duration),
+            '%s' % rec.launch_mode.get_parameters().get('n',1),
+            '%s' % rec.executable.name,
+            '%s' % rec.main_file,
+            '<span title="%s">%s</span>' % (rec.version,rec.version[:5]),# ['','*'][rec.diff]),
+            '%s' % rec.script_arguments,
+            # ' '.join(map(lambda tag: '<button class="btn btn-default btn-xs">%s</button>' %tag, rec.tags.split(',')))
+        ])
+
+        # Create buttons for tags
+        tags = []
+        if rec.tags != '':
+            for tag in rec.tags.split(','):
+                tags.append('<button class="btn btn-default btn-xs tag">%s</button>' %tag)
+        data[-1].append(' '.join(tags))
+
+    response_json = json.dumps({
+        "draw": draw,
+        "recordsTotal": recordsTotal,
+        "recordsFiltered": len(records),
+        "data": data
+        })
+
+    return HttpResponse(response_json,content_type="application/json")
 
 
 def parameter_list(request, project):

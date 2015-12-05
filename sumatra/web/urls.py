@@ -36,7 +36,7 @@ urlpatterns = patterns('',
                        (r'^%(project)s/data/datafile$' % P, DataDetailView.as_view()),
                        (r'^%(project)s/script$' % P, 'sumatra.web.views.show_script'),
                        (r'^%(project)s/data/(?P<datastore_id>\d+)$', 'sumatra.web.views.show_content'),
-                       (r'^%(project)s/ajax/record$' % P, 'sumatra.web.views.ajax_record'),                       
+                       (r'^%(project)s/datatable/record$' % P, 'sumatra.web.views.datatable_record'),                       
                        )
 
 urlpatterns += staticfiles_urlpatterns()

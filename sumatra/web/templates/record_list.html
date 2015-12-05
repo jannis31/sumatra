@@ -197,7 +197,7 @@ $(document).ready(function() {
         "processing":       true,
         "serverSide":       true,
         "ajax": {
-            "url": "/{{project.id}}/ajax/record",
+            "url": "/{{project.id}}/datatable/record",
             "data": function ( d ) {
                 d.tag = selected_tag;
             }
@@ -274,7 +274,7 @@ $(document).ready(function() {
     });
 
     /* select tag from dropdown menu */
-    $('.tag').click(function () {
+    $('.tag').on('click', function () {
         if ( selected_tag == $(this).attr('value') ) {
             selected_tag = 'null';
         } else {
