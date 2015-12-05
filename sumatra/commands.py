@@ -428,8 +428,7 @@ def list(argv):  # add 'report' and 'log' as aliases
                         help="list records in reverse order (default: newest first)")
     parser.add_argument('-m', '--main_file', help="the name of the script for filtering list of records.")
     parser.add_argument('-n', '--number', help="display the last NUMBER of records")
-    parser.add_argument('-d', '--date',
-                        dest='timestamp', help="the date (YYYY-MM-DD) for filtering list of records. ")
+    parser.add_argument('-d', '--date', help="the date (YYYY-MM-DD) for filtering list of records. ")
     parser.add_argument('-v', '--version', metavar='REV',
                         help="use version REV of the code. The first 5 characters is sufficent for filtering list of records.")
     parser.add_argument('-p', '--parameter_view', action="store_const", const="parameter_view",
@@ -452,18 +451,18 @@ def list(argv):  # add 'report' and 'log' as aliases
     kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'number':args.number,
         'params_filter': args.params_filter, 'reverse':args.reverse}
 
-    if args.timestamp:
-        if ' - ' in args.timestamp:
-            date1,date2 = args.timestamp.split(' - ')
+    if args.date:
+        if ' - ' in args.date:
+            date1,date2 = args.date.split(' - ')
             kwargs['timestamp__range'] = [date1, datetime.datetime.strptime(date2, '%Y-%m-%d')+datetime.timedelta(1)]
-        elif args.timestamp.endswith(' -'):
-            kwargs['timestamp__range'] = [args.timestamp[:-2], datetime.datetime.now()]
-        elif args.timestamp == 'today':
+        elif args.date.endswith(' -'):
+            kwargs['timestamp__range'] = [args.date[:-2], datetime.datetime.now()]
+        elif args.date == 'today':
             today = datetime.datetime.today()
             kwargs['timestamp__range'] = [today, today+datetime.timedelta(1)]
         else:
-            date = datetime.datetime.strptime(args.timestamp, '%Y-%m-%d')
-            kwargs['timestamp__range'] = [args.timestamp, date+datetime.timedelta(1)]
+            date = datetime.datetime.strptime(args.date, '%Y-%m-%d')
+            kwargs['timestamp__range'] = [args.date, date+datetime.timedelta(1)]
 
     if args.main_file is not None: kwargs['main_file__startswith'] = args.main_file
     if args.version is not None: kwargs['version__startswith'] = args.version
