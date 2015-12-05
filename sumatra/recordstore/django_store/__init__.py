@@ -273,7 +273,7 @@ class DjangoRecordStore(RecordStore):
             for tag in tags:
                 db_records = db_records.filter(tags__contains=tag)
         if number:
-            db_records = db_records[-1*int(number):]
+            db_records = db_records[len(db_records)-int(number):]
         try:
             records = [db_record.to_sumatra() for db_record in db_records]
         except Exception as err:
