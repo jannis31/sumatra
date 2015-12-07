@@ -248,9 +248,6 @@ class ImageListView(ListView):
 
 
 def datatable_record(request, project):
-
-    print(request.GET.items())
-
     columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
      'duration', 'launch_mode', 'executable', 'main_file', 'version', 'script_arguments', 'tags']
     selected_tag = request.GET['tag']
@@ -281,7 +278,6 @@ def datatable_record(request, project):
                 Q(version__contains=sq) |
                 Q(tags__contains=sq)
                 )
-
     records = records.order_by(order_dir+columns[order])                        # Ordering
 
     data = []
@@ -493,7 +489,7 @@ class SettingsView(View):
     def post(self, request):
         if django_settings.READ_ONLY:
             return HttpResponse('It is in read-only mode.')
-        settings = self.load_settings()
+        table_settings = self.load_settings()
         data = json.loads(request.body.decode('utf-8'))
         table_settings.update(data["settings"])
         self.save_settings(table_settings)
