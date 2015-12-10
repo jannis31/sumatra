@@ -15,6 +15,7 @@ from django.conf import settings as django_settings
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.views.generic.list import ListView
+from django.template import defaultfilters as filters
 try:
     from django.views.generic.dates import MonthArchiveView
 except ImportError:  # older versions of Django
@@ -232,14 +233,10 @@ class DataDetailView(DetailView):
 
 
 class ImageListView(ListView):
-    context_object_name = 'project'
+    context_object_name = 'data_keys'
     template_name = 'image_list.html'
 
     def get_queryset(self):
-        return Project.objects \
-            .using(_label_db.get(self.kwargs["project"],'default')) \
-            .get(pk=self.kwargs["project"])
-
         return DataKey.objects \
             .using(_label_db.get(self.kwargs["project"],'default')) \
             .filter(output_from_record__project_id=self.kwargs["project"]) \
@@ -326,7 +323,7 @@ def datatable_record(request, project):
 
 
 def datatable_datakey(request, project):
-    columns = ['directory', 'filename', 'digest', 'size', 'date', 'output_from_record','input_to_records']
+    columns = ['path', 'path', 'digest', 'metadata', 'creation', 'output_from_record','input_to_records']
     search_value = request.GET['search[value]']
     order = int(request.GET['order[0][column]'])
     order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
@@ -345,22 +342,22 @@ def datatable_datakey(request, project):
             datakeys = datakeys.filter(
                 Q(path__contains=sq) |
                 Q(digest__contains=sq) |
-                Q(metadata__contains=sq) |
-                Q(duration__contains=sq) |
-                Q(output_from_record__label__contains=sq)
+                Q(creation__contains=sq) |
+                Q(metadata__contains=sq)
                 )
     datakeys = datakeys.order_by(order_dir+columns[order])                        # Ordering
 
     data = []
     for dk in datakeys[start:start+length]:
         data.append([
-            '%s' % dk.path,
-            '<a href="/%s/%s/">%s</a>' % (project, dk.path, dk.path),
-            '<span style="title:%s">%s...</span>' % (dk.digest, dk.digest[:8]),
-            '%s' % (dk.get_metadata()['size']),
+            '%s' % os.path.dirname(dk.path),
+            '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
+                %(project,dk.path,dk.digest,dk.creation,os.path.basename(dk.path)),
+            '<span title="%s">%s...</span>' % (dk.digest, dk.digest[:8]),
+            '%s' % (filters.filesizeformat(dk.get_metadata()['size'])),
             '<span style="display:none">%s</span>%s' % (dk.creation.strftime('%Y%m%d%H%M%S'),dk.creation.strftime('%d/%m/%Y %H:%M:%S')),
-            '<a href="/%s/%s">%s</a>' % (project,dk.output_from_record.label,dk.output_from_record.label),
-            ' '.join(map(lambda x: '<a href="/%s/%s">%s</a>' % (project,x.label,x.label), dk.input_to_records.all()))
+            '<a href="/%s/%s/">%s</a>' % (project,dk.output_from_record.label,dk.output_from_record.label),
+            ' '.join(map(lambda x: '<a href="/%s/%s/">%s</a>' % (project,x.label,x.label), dk.input_to_records.all()))
             ])
 
     response_json = json.dumps({
