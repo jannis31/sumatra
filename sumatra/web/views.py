@@ -130,15 +130,16 @@ class RecordDetailView(DetailView):
 
 
 class DataListView(ListView):
-    context_object_name = 'data_keys'
+    context_object_name = 'project'
     template_name = 'data_list.html'
 
     def get_queryset(self):
-        return DataKey.objects.using(_label_db.get(self.kwargs["project"],'default')).filter(output_from_record__project_id=self.kwargs["project"])
+        return Project.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .get(pk=self.kwargs["project"])
 
     def get_context_data(self, **kwargs):
         context = super(DataListView, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
         return context
 
 
@@ -231,10 +232,14 @@ class DataDetailView(DetailView):
 
 
 class ImageListView(ListView):
-    context_object_name = 'data_keys'
+    context_object_name = 'project'
     template_name = 'image_list.html'
 
     def get_queryset(self):
+        return Project.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .get(pk=self.kwargs["project"])
+
         return DataKey.objects \
             .using(_label_db.get(self.kwargs["project"],'default')) \
             .filter(output_from_record__project_id=self.kwargs["project"]) \
@@ -285,8 +290,8 @@ def datatable_record(request, project):
         data.append([
             '<a href="/%s/%s/">%s</a>' % (project, rec.label, rec.label),
             '<span style="display:none">%s</span>%s' % (rec.timestamp.strftime('%Y%m%d%H%M%S'),rec.timestamp.strftime('%d/%m/%Y %H:%M:%S')),
-            '<span title="%s">%s</span>' % (rec.reason,rec.reason[:20]),
-            '<span title="%s">%s</span>' % (rec.outcome,rec.outcome[:20]),
+            '<span title="%s">%s...</span>' % (rec.reason,rec.reason[:20]),
+            '<span title="%s">%s...</span>' % (rec.outcome,rec.outcome[:20]),
             ' '.join(map(lambda x: '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
                 %(project,x.path,x.digest,x.creation,x.path), rec.input_data.all())),
             ' '.join(map(lambda x: '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
@@ -295,7 +300,7 @@ def datatable_record(request, project):
             '%s' % rec.launch_mode.get_parameters().get('n',1),
             '%s' % rec.executable.name,
             '%s' % rec.main_file,
-            '<span title="%s">%s</span>' % (rec.version,rec.version[:5]),# ['','*'][rec.diff]),
+            '<span title="%s">%s...</span>' % (rec.version,rec.version[:5]),# ['','*'][rec.diff]),
             '%s' % rec.script_arguments,
             # ' '.join(map(lambda tag: '<button class="btn btn-default btn-xs">%s</button>' %tag, rec.tags.split(',')))
         ])
@@ -311,6 +316,54 @@ def datatable_record(request, project):
         "draw": draw,
         "recordsTotal": recordsTotal,
         "recordsFiltered": len(records),
+        "data": data
+        })
+
+    return HttpResponse(response_json,content_type="application/json")
+
+
+
+def datatable_datakey(request, project):
+    columns = ['directory', 'filename', 'digest', 'size', 'date', 'output_from_record','input_to_records']
+    search_value = request.GET['search[value]']
+    order = int(request.GET['order[0][column]'])
+    order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
+    length = int(request.GET['length'])
+    start = int(request.GET['start'])
+    draw = int(request.GET['draw'])
+
+    datakeys = DataKey.objects.using(_label_db.get(self.kwargs["project"],'default')).filter(output_from_record__project_id=self.kwargs["project"])
+    datakeysTotal = len(datakeys)
+
+    # Filter by search queries
+    if search_value != '':
+        search_queries = search_value.split(' ')
+        for sq in search_queries:
+            datakeys = datakeys.filter(
+                Q(path__contains=sq) |
+                Q(digest__contains=sq) |
+                Q(metadata__contains=sq) |
+                Q(duration__contains=sq) |
+                Q(output_from_record__label__contains=sq)
+                )
+    datakeys = datakeys.order_by(order_dir+columns[order])                        # Ordering
+
+    data = []
+    for dk in datakeys[start:start+length]:
+        data.append([
+            '%s' % dk.path,
+            '<a href="/%s/%s/">%s</a>' % (project, dk.path, dk.path),
+            '<span style="title:%s">%s...</span>' % (dk.digest, dk.digest[:8]),
+            '%s' % (dk.get_metadata()['size']),
+            '<span style="display:none">%s</span>%s' % (dk.creation.strftime('%Y%m%d%H%M%S'),dk.creation.strftime('%d/%m/%Y %H:%M:%S')),
+            '<a href="/%s/%s">%s</a>' % (project,dk.output_from_record.label,dk.output_from_record.label),
+            ' '.join(map(lambda x: '<a href="/%s/%s">%s</a>' % (project,x.label,x.label), dk.input_to_records.all()))
+            ])
+
+    response_json = json.dumps({
+        "draw": draw,
+        "recordsTotal": datakeysTotal,
+        "recordsFiltered": len(datakeys),
         "data": data
         })
 
