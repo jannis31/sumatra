@@ -43,13 +43,8 @@ $(document).ready(function() {
     var table = $('#data-keys').dataTable( {
         "processing":       true,
         "serverSide":       true,
-        "ajax": {
-            "url": "/{{project.id}}/datatable/datakey",
-            "data": function ( d ) {
-                d.tag = selected_tag;
-            }
-        },
-        "order": [[ 4, "desc" ]]
+        "ajax":             "/{{project.id}}/datatable/datakey",
+        "order":            [[ 4, "desc" ]]
     } );
 
     $('#data-keys tbody').on( 'click', 'tr', function () {
