@@ -224,6 +224,11 @@ class DataKey(BaseModel):
         metadata = self.get_metadata()
         return datastore.DataKey(self.path, self.digest, self.creation, **metadata)
 
+    @property
+    def size(self):
+        metadata = self.get_metadata()
+        return metadata['size']
+
 
 class PlatformInformation(BaseModel):
     architecture_bits = models.CharField(max_length=100)

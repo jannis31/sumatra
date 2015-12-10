@@ -18,6 +18,7 @@ from textwrap import dedent
 import warnings
 import logging
 import sumatra
+import datetime
 
 from sumatra.programs import get_executable
 from sumatra.datastore import get_data_store
@@ -426,6 +427,8 @@ def list(argv):  # add 'report' and 'log' as aliases
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
                         help="list records in reverse order (default: newest first)")
     parser.add_argument('-m', '--main_file', help="the name of the script for filtering list of records.")
+    parser.add_argument('-n', '--number', help="display the last NUMBER of records")
+    parser.add_argument('-d', '--date', help="the date (YYYY-MM-DD) for filtering list of records. ")
     parser.add_argument('-v', '--version', metavar='REV',
                         help="use version REV of the code. The first 5 characters is sufficent for filtering list of records.")
     parser.add_argument('-p', '--parameter_view', action="store_const", const="parameter_view",
@@ -434,14 +437,33 @@ def list(argv):  # add 'report' and 'log' as aliases
     #parser.add_argument('-k', '--keyword', metavar='KW', default=None,  help="additional information to label")
     parser.add_argument('-o', '--output_files', action="store_const", const="output_files",
                         dest="mode", help="list output files")
+    parser.add_argument('-w', '--write_labels', action="store_true", dest="write_labels", default=False,
+                        help="write list record labels in .smt/labels")
+
     args = parser.parse_args(argv)
 
     project = load_project()
-    if os.path.exists('.smt'):
-        f = open('.smt/labels', 'w')
-        f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
-        f.close()
-    kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'params_filter': args.params_filter, 'reverse':args.reverse}
+    if args.write_labels:
+        if os.path.exists('.smt'):
+            f = open('.smt/labels', 'w')
+            f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
+            f.close()
+    kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'number':args.number,
+        'params_filter': args.params_filter, 'reverse':args.reverse}
+
+    if args.date:
+        if ' - ' in args.date:
+            date1,date2 = args.date.split(' - ')
+            kwargs['timestamp__range'] = [date1, datetime.datetime.strptime(date2, '%Y-%m-%d')+datetime.timedelta(1)]
+        elif args.date.endswith(' -'):
+            kwargs['timestamp__range'] = [args.date[:-2], datetime.datetime.now()]
+        elif args.date == 'today':
+            today = datetime.datetime.today()
+            kwargs['timestamp__range'] = [today, today+datetime.timedelta(1)]
+        else:
+            date = datetime.datetime.strptime(args.date, '%Y-%m-%d')
+            kwargs['timestamp__range'] = [args.date, date+datetime.timedelta(1)]
+
     if args.main_file is not None: kwargs['main_file__startswith'] = args.main_file
     if args.version is not None: kwargs['version__startswith'] = args.version
     print(project.format_records(**kwargs))

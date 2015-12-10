@@ -307,12 +307,10 @@ class Project(object):
         return n
 
     def find_records(self, tags=None, params_filter=None, reverse=False, *args, **kwargs):
-        records = self.record_store.list(self.name, tags, *args, **kwargs)
+        records = self.record_store.list(self.name, tags, reverse=reverse, *args, **kwargs)
         if params_filter is not None:
             for parameter in params_filter.split(','):
                 records = _filter_record_by_param(records,parameter)
-        if reverse:
-            records.reverse()
         return records
 
     # def find_data() here?

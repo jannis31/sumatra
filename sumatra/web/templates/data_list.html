@@ -28,46 +28,7 @@
     </thead>
 
     <tbody>
-
-    {% for data_key in data_keys %}
-    <tr id="{{data_key.digest}}">
-        <td>
-            {{data_key.path|dirname|ubreak}}
-        </td>
-        <td>
-            <a href="/{{project.id}}/data/datafile?path={{data_key.path|urlencode}}&digest={{data_key.digest}}&creation={{data_key.creation|date:"c"}}">
-                {{data_key.path|basename|ubreak}}
-            </a>
-        </td>
-        <td>
-            {{data_key.digest|truncatechars:12 }}
-        </td>
-        <td>
-            {{data_key|eval_metadata:'size'|filesizeformat}}
-        </td>
-        <td>
-        <span style='display:none;'>
-          <!-- hack for correct sorting -->
-            {{data_key.output_from_record.timestamp|date:"YmdHis"}}
-        </span>
-            {{data_key.output_from_record.timestamp|date:"d/m/Y H:i:s"}}
-        </td>
-        <td>
-            <a href="/{{project.id}}/{{data_key.output_from_record.label}}/">
-                {{data_key.output_from_record.label|ubreak}}
-            </a>
-        </td>
-        <td>
-            {% for record in data_key.input_to_records.all %}
-            <a href="/{{project.id}}/{{record.label}}/">
-                {{record.label|ubreak}}
-            </a>{% if not forloop.last %}, {% endif %}
-            {% endfor %}
-        </td>
-    </tr>
-    {% endfor %}
-
-    <tbody>
+    </tbody>
 </table>
 
 {% endblock %}
@@ -80,10 +41,10 @@ $(document).ready(function() {
     $('#nav-data').addClass('active');
 
     var table = $('#data-keys').dataTable( {
-        "info": false,
-        "deferRender": true,
-        // "dom": 'ftlp',
-        "order": [[ 4, "desc" ]]
+        "processing":       true,
+        "serverSide":       true,
+        "ajax":             "/{{project.id}}/datatable/datakey",
+        "order":            [[ 4, "desc" ]]
     } );
 
     $('#data-keys tbody').on( 'click', 'tr', function () {
