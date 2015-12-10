@@ -334,7 +334,7 @@ def datatable_datakey(request, project):
     start = int(request.GET['start'])
     draw = int(request.GET['draw'])
 
-    datakeys = DataKey.objects.using(_label_db \
+    datakeys = DataKey.objects.using(_label_db) \
         .get(project,'default')) \
         .filter(output_from_record__project_id=project)
     datakeysTotal = len(datakeys)
