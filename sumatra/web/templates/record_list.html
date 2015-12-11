@@ -53,7 +53,8 @@
 <!-- <table id="records" class="display" cellspacing="0" width="100%"> -->
     <thead>
     <tr>
-        <th id="label">Label</th>
+        <th>Id</th>
+        <th>Label</th>
         <th>Date/Time</th>
         <th>Reason</th>
         <th>Outcome</th>
@@ -118,18 +119,19 @@
       </div>
       <div class="modal-body" id="columnsToDisplay">
         <h5>Columns to display</h5>
-        <div class="checkbox"><label><input type="checkbox" data-column='1' checked="checked"> Date/Time</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='2' checked="checked"> Reason</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='3' checked="checked"> Outcome</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='4' checked="checked"> Input data</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='5' checked="checked"> Output data</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='6' checked="checked"> Duration</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='7' checked="checked"> Processes</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='8' checked="checked"> Executable</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='9' checked="checked"> Main</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='10' checked="checked"> Version</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='11' checked="checked"> Arguments</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='12' checked="checked"> Tags</label></div>
+        <div class="checkbox hidden"><label><input type="checkbox" data-column='0' checked="checked"> Id</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='2' checked="checked"> Date/Time</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='3' checked="checked"> Reason</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='4' checked="checked"> Outcome</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='5' checked="checked"> Input data</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='6' checked="checked"> Output data</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='7' checked="checked"> Duration</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='8' checked="checked"> Processes</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='9' checked="checked"> Executable</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='10' checked="checked"> Main</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='11' checked="checked"> Version</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='12' checked="checked"> Arguments</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='13' checked="checked"> Tags</label></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -176,10 +178,9 @@ $(document).ready(function() {
         type: "GET",
         dataType: "json",
         complete: function(data){
-            var hidden = data.responseJSON["hidden_cols"];
-            if (typeof hidden === "undefined" || hidden ===  null) {
-                hidden = [];
-            }
+            console.log(data.responseJSON["hidden_cols"])
+            var hidden = [0].concat(data.responseJSON["hidden_cols"]);
+            console.log(hidden)
             console.log("hidden: " + hidden);
             columnDefs = [{
                 "targets": hidden,
@@ -195,6 +196,8 @@ $(document).ready(function() {
 
     /* initialize DataTable */
     var table = $('#records').DataTable({
+        // "info":             false,
+        // "deferRender":      true,
         "processing":       true,
         "serverSide":       true,
         "ajax": {
@@ -203,16 +206,31 @@ $(document).ready(function() {
                 d.tag = selected_tag;
             }
         },
-        // "info":             false,
-        // "deferRender":      true,
+        // "columns": [
+        //     { "name": "id" },
+        //     { "name": "label" },
+        //     { "name": "timestamp" },
+        //     { "name": "reason" },
+        //     { "name": "outcome" },
+        //     { "name": "output_data" },
+        //     { "name": "input_data" },
+        //     { "name": "duration" },
+        //     { "name": "processes" },
+        //     { "name": "executable" },
+        //     { "name": "main_file" },
+        //     { "name": "version" },
+        //     { "name": "arguments" },
+        //     { "name": "tags" },
+        // ],
+        "rowId": '0',
         // "colReorder":       true,
-        "order":            [[ 1, "desc" ]],
+        "order":            [[ 2, "desc" ]],
         "columnDefs":       columnDefs,
         // stateSave: true
     });
     // new $.fn.dataTable.FixedHeader( table );
 
-    $('#records').find('td:eq(1)').attr('nowrap', 'nowrap');
+    $('#records').find('td:eq(2)').attr('nowrap', 'nowrap');
 
     /* select rows when clicked */
     $('#records tbody').on('click', 'tr', function() {
@@ -300,7 +318,7 @@ $(document).ready(function() {
     $('#apply-settings').click(function() {
         var success = false;
         var visible = [];
-        var hidden = [];
+        var hidden = [0];
         $('#columnsToDisplay input:checked').each(function() {
             visible.push(parseInt($(this).attr('data-column')));
             var column = table.column($(this).attr('data-column'));

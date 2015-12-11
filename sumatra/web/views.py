@@ -250,7 +250,7 @@ class ImageListView(ListView):
 
 
 def datatable_record(request, project):
-    columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
+    columns = ['id', 'label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
      'duration', 'launch_mode', 'executable', 'main_file', 'version', 'script_arguments', 'tags']
     selected_tag = request.GET['tag']
     search_value = request.GET['search[value]']
@@ -287,6 +287,7 @@ def datatable_record(request, project):
     data = []
     for rec in records[start:start+length]:
         data.append([
+            '%s' % rec.label,
             '<a href="/%s/%s/">%s</a>' % (project, rec.label, rec.label),
             '<span style="display:none">%s</span>%s' % (rec.timestamp.strftime('%Y%m%d%H%M%S'),rec.timestamp.strftime('%d/%m/%Y %H:%M:%S')),
             '<span title="%s">%s...</span>' % (rec.reason,rec.reason[:20]),

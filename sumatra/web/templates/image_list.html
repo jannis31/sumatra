@@ -98,6 +98,7 @@ $(document).ready(function() {
                 d.tag = selected_tag;
             }
         },
+        "aLengthMenu": [[8, 32, 128], [8, 32, 128]],
         // "dom":           'ftlp',
         "order":            [[ 0, "desc" ]],
         "fnPreDrawCallback": function (oSettings) {
@@ -108,13 +109,13 @@ $(document).ready(function() {
               $('#thumbs_container').html('');
 
               return true;
-              },
-            "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-                  $('#thumbs_container').append(aData[1]);
-                  $('.thumb div').addClass('thumbnail')
+          },
+        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+              $('#thumbs_container').append(aData[1]);
+              $('.thumb div').addClass('thumbnail')
 
-                  return nRow;
-              },
+              return nRow;
+          },
     });
 
     $('#thumbgrid-view').on('click', function() {
