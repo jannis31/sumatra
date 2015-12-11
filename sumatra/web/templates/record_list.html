@@ -53,7 +53,6 @@
 <!-- <table id="records" class="display" cellspacing="0" width="100%"> -->
     <thead>
     <tr>
-        <th>Id</th>
         <th>Label</th>
         <th>Date/Time</th>
         <th>Reason</th>
@@ -119,19 +118,18 @@
       </div>
       <div class="modal-body" id="columnsToDisplay">
         <h5>Columns to display</h5>
-        <div class="checkbox hidden"><label><input type="checkbox" data-column='0' checked="checked"> Id</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='2' checked="checked"> Date/Time</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='3' checked="checked"> Reason</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='4' checked="checked"> Outcome</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='5' checked="checked"> Input data</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='6' checked="checked"> Output data</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='7' checked="checked"> Duration</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='8' checked="checked"> Processes</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='9' checked="checked"> Executable</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='10' checked="checked"> Main</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='11' checked="checked"> Version</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='12' checked="checked"> Arguments</label></div>
-        <div class="checkbox"><label><input type="checkbox" data-column='13' checked="checked"> Tags</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='1' checked="checked"> Date/Time</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='2' checked="checked"> Reason</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='3' checked="checked"> Outcome</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='4' checked="checked"> Input data</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='5' checked="checked"> Output data</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='6' checked="checked"> Duration</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='7' checked="checked"> Processes</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='8' checked="checked"> Executable</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='9' checked="checked"> Main</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='10' checked="checked"> Version</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='11' checked="checked"> Arguments</label></div>
+        <div class="checkbox"><label><input type="checkbox" data-column='12' checked="checked"> Tags</label></div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
@@ -178,13 +176,11 @@ $(document).ready(function() {
         type: "GET",
         dataType: "json",
         complete: function(data){
-            console.log(data.responseJSON["hidden_cols"])
-            var hidden = [0].concat(data.responseJSON["hidden_cols"]);
-            console.log(hidden)
+            var hidden = data.responseJSON["hidden_cols"];
             console.log("hidden: " + hidden);
             columnDefs = [{
-                "targets": hidden,
-                "visible": false
+                "visible": false,
+                "targets": hidden
             }];
             console.log(columnDefs);
             hidden.forEach(function(col) {
@@ -193,6 +189,50 @@ $(document).ready(function() {
         },
         async: false
     });
+
+    // Column Renderer
+    columnDefs = columnDefs.concat([
+        {"render": function(data, type, row) {
+            return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>';
+        }, "targets": [0]},                                                     // label
+        //  {"render": function(data, type, row) {
+        //     return '<span class="hidden">'+row.date_filter+'</span>'+data;
+        // }, "targets": [1]},                                                     // date
+        {"render": function(data, type, row) {
+            if (data.length < 20) {
+                return data
+            } else {
+                return '<span title="'+data+'">'+data.slice(0,20)+'...</span>'
+            }
+        }, "targets": [2,3]},                                                   // reason,outcome
+        {"render": function(data, type, row) {
+            var rendered_data = [];
+            for (var i=0;i<data.length;i++) {
+                rendered_data.push('<a href="/'+row.project+'/data/datafile?'+
+                    'path='+data[i].path+'&digest='+data[i].digest+
+                    '&creation='+data[i].creation+'">'+data[i].path+'</a>')
+            }
+            return rendered_data.join(' ');
+        }, "targets": [4,5]},                                                   // input data, output data
+        {"render": function(data, type, row) {
+            return data.toFixed(2)+' s';
+        }, "targets": [6]},                                                     // duration
+        {"render": function(data, type, row) {
+            if (data.length < 5) {
+                return data
+            } else {
+                return '<span title="'+data+'">'+data.slice(0,5)+'</span>'
+            }
+        }, "targets": [10]},                                                    // version
+        {"render": function(data, type, row) {
+            if (data.length == 0) {
+                return ''
+            } else {
+                tags = data.split(',')
+                return '<button class="btn btn-default btn-xs tag">'+tags.join('</button> <button class="btn btn-default btn-xs tag">')+'</button>';
+            }
+        }, "targets": [12]},                                                    // tags
+    ])
 
     /* initialize DataTable */
     var table = $('#records').DataTable({
@@ -206,31 +246,44 @@ $(document).ready(function() {
                 d.tag = selected_tag;
             }
         },
-        // "columns": [
-        //     { "name": "id" },
-        //     { "name": "label" },
-        //     { "name": "timestamp" },
-        //     { "name": "reason" },
-        //     { "name": "outcome" },
-        //     { "name": "output_data" },
-        //     { "name": "input_data" },
-        //     { "name": "duration" },
-        //     { "name": "processes" },
-        //     { "name": "executable" },
-        //     { "name": "main_file" },
-        //     { "name": "version" },
-        //     { "name": "arguments" },
-        //     { "name": "tags" },
-        // ],
-        "rowId": '0',
+        "columns": [
+            { "data": "label" },
+            { "data": "date" },
+            { "data": "reason" },
+            { "data": "outcome" },
+            { "data": "input_data" },
+            { "data": "output_data" },
+            { "data": "duration" },
+            { "data": "processes" },
+            { "data": "executable" },
+            { "data": "main_file" },
+            { "data": "version" },
+            { "data": "arguments" },
+            { "data": "tags" },
+        ],
         // "colReorder":       true,
-        "order":            [[ 2, "desc" ]],
+        "order":            [[ 1, "desc" ]],
         "columnDefs":       columnDefs,
+        // "drawCallback": function ( settings ) {                             # Row grouping
+        //     var api = this.api();
+        //     var rows = api.rows( {page:'current'} ).nodes();
+        //     var last=null;
+        //
+        //     api.column(11, {page:'current'} ).data().each( function ( group, i ) {
+        //         if ( last !== group ) {
+        //             $(rows).eq( i ).before(
+        //                 '<tr class="group"><td colspan="14">'+group+'</td></tr>'
+        //             );
+        //
+        //             last = group;
+        //         }
+        //     });
+        // }
         // stateSave: true
     });
     // new $.fn.dataTable.FixedHeader( table );
 
-    $('#records').find('td:eq(2)').attr('nowrap', 'nowrap');
+    $('#records').find('td:eq(1)').attr('nowrap', 'nowrap');
 
     /* select rows when clicked */
     $('#records tbody').on('click', 'tr', function() {
@@ -318,7 +371,7 @@ $(document).ready(function() {
     $('#apply-settings').click(function() {
         var success = false;
         var visible = [];
-        var hidden = [0];
+        var hidden = [];
         $('#columnsToDisplay input:checked').each(function() {
             visible.push(parseInt($(this).attr('data-column')));
             var column = table.column($(this).attr('data-column'));

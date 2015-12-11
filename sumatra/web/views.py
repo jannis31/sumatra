@@ -250,7 +250,7 @@ class ImageListView(ListView):
 
 
 def datatable_record(request, project):
-    columns = ['id', 'label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
+    columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
      'duration', 'launch_mode', 'executable', 'main_file', 'version', 'script_arguments', 'tags']
     selected_tag = request.GET['tag']
     search_value = request.GET['search[value]']
@@ -275,6 +275,7 @@ def datatable_record(request, project):
         for sq in search_queries:
             records = records.filter(
                 Q(label__contains=sq) |
+                Q(timestamp__contains=sq) |
                 Q(reason__contains=sq) |
                 Q(outcome__contains=sq) |
                 Q(duration__contains=sq) |
@@ -286,31 +287,23 @@ def datatable_record(request, project):
 
     data = []
     for rec in records[start:start+length]:
-        data.append([
-            '%s' % rec.label,
-            '<a href="/%s/%s/">%s</a>' % (project, rec.label, rec.label),
-            '<span style="display:none">%s</span>%s' % (rec.timestamp.strftime('%Y%m%d%H%M%S'),rec.timestamp.strftime('%d/%m/%Y %H:%M:%S')),
-            '<span title="%s">%s...</span>' % (rec.reason,rec.reason[:20]),
-            '<span title="%s">%s...</span>' % (rec.outcome,rec.outcome[:20]),
-            ' '.join(map(lambda x: '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
-                %(project,x.path,x.digest,x.creation,x.path), rec.input_data.all())),
-            ' '.join(map(lambda x: '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
-                %(project,x.path,x.digest,x.creation,x.path), rec.output_data.all())),
-            '<span style="display:none">%f</span>%.2fs' % (rec.duration,rec.duration),
-            '%s' % rec.launch_mode.get_parameters().get('n',1),
-            '%s' % rec.executable.name,
-            '%s' % rec.main_file,
-            '<span title="%s">%s...</span>' % (rec.version,rec.version[:5]),# ['','*'][rec.diff]),
-            '%s' % rec.script_arguments,
-            # ' '.join(map(lambda tag: '<button class="btn btn-default btn-xs">%s</button>' %tag, rec.tags.split(',')))
-        ])
-
-        # Create buttons for tags
-        tags = []
-        if rec.tags != '':
-            for tag in rec.tags.split(','):
-                tags.append('<button class="btn btn-default btn-xs tag">%s</button>' %tag)
-        data[-1].append(' '.join(tags))
+        data.append({
+            'DT_RowId':     rec.label,
+            'project':      project,
+            'label':        rec.label,
+            'date':         rec.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'reason':       rec.reason,
+            'outcome':      rec.outcome,
+            'input_data':   map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.input_data.all()),
+            'output_data':  map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.output_data.all()),
+            'duration':     rec.duration,
+            'processes':    rec.launch_mode.get_parameters().get('n',1),
+            'executable':   rec.executable.name,
+            'main_file':    rec.main_file,
+            'version':      rec.version,
+            'arguments':    rec.script_arguments,
+            'tags':         rec.tags,
+        })
 
     response_json = json.dumps({
         "draw": draw,
