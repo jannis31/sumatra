@@ -322,7 +322,7 @@ def datatable_record(request, project):
 
 
 
-def datatable_datakey(request, project):
+def datatable_data(request, project):
     columns = ['path', 'path', 'digest', 'metadata', 'creation', 'output_from_record','input_to_records']
     search_value = request.GET['search[value]']
     order = int(request.GET['order[0][column]'])
@@ -364,6 +364,63 @@ def datatable_datakey(request, project):
         "draw": draw,
         "recordsTotal": datakeysTotal,
         "recordsFiltered": len(datakeys),
+        "data": data
+        })
+
+    return HttpResponse(response_json,content_type="application/json")
+
+
+def datatable_image(request, project):
+    columns = ['creation', 'path', 'output_from_record__label', 'output_from_record__reason', 'output_from_record__outcome', 'output_from_record__tags']
+    search_value = request.GET['search[value]']
+    order = int(request.GET['order[0][column]'])
+    order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
+    length = int(request.GET['length'])
+    start = int(request.GET['start'])
+    draw = int(request.GET['draw'])
+
+    images = DataKey.objects.using(_label_db.get(project,'default')) \
+        .filter(output_from_record__project_id=project) \
+        .filter(metadata__contains='image')
+    imagesTotal = len(images)
+
+    # Filter by search queries
+    if search_value != '':
+        search_queries = search_value.split(' ')
+        for sq in search_queries:
+            images = images.filter(
+                Q(path__contains=sq) |
+                Q(digest__contains=sq) |
+                Q(creation__contains=sq) |
+                Q(output_from_record__label__contains=sq) |
+                Q(output_from_record__reason__contains=sq) |
+                Q(output_from_record__outcome__contains=sq) |
+                Q(output_from_record__tags__contains=sq)
+                )
+    images = images.order_by(order_dir+columns[order])                        # Ordering
+
+    data = []
+    for im in images[start:start+length]:
+        data.append([
+            '<span style="display:none">%s</span>%s' %(im.creation.strftime('%Y%m%d%H%M%S'),im.creation.strftime('%d/%m/%Y %H:%M:%S')),
+            '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
+                <img src="/static/%s" style="width:250px">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
+            '<a href="/%s/%s/">%s</a>' % (project, im.output_from_record.label, im.output_from_record.label),
+            '<span title="%s">%s...</span>' % (im.output_from_record.reason,im.output_from_record.reason[:300]),
+            '<span title="%s">%s...</span>' % (im.output_from_record.outcome,im.output_from_record.outcome[:300])
+            ])
+
+        # Create buttons for tags
+        tags = []
+        if im.output_from_record.tags != '':
+            for tag in im.output_from_record.tags.split(','):
+                tags.append('<button class="btn btn-default btn-xs tag">%s</button>' %tag)
+        data[-1].append(' '.join(tags))
+
+    response_json = json.dumps({
+        "draw": draw,
+        "recordsTotal": imagesTotal,
+        "recordsFiltered": len(images),
         "data": data
         })
 

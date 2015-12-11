@@ -26,10 +26,14 @@
             </li>
 
             <div role="group" class="pull-right" style="margin:-5px">
-				<button class="btn btn-default btn-sm active"><span class="glyphicon glyphicon-th-list"></span></button>
+				<!-- <button class="btn btn-default btn-sm active"><span class="glyphicon glyphicon-th-list"></span></button>
                 <a href='/{{project.id}}/image/thumbgrid' type="button" class="btn btn-default btn-sm" id="layout">
                     <span class="glyphicon glyphicon-th"></span>
-                </a>
+                </a> -->
+                <button class="btn btn-default btn-sm" id="image-table-view">
+                    <span class="glyphicon glyphicon-th-list"></span></button>
+                <button class="btn btn-default btn-sm" id="thumbgrid-view">
+                    <span class="glyphicon glyphicon-th"></span></button>
             </div>
 {% endblock %}
 
@@ -39,7 +43,7 @@
 <h3>{{project.name}}</h3>
 {% endif %}
 
-<table id="data-keys" class="table table-striped table-condensed" cellspacing="0" width="100%">
+<table id="images-table" class="table table-striped table-condensed" cellspacing="0" width="100%">
     <thead>
     <tr>
       <th>Date/Time</th>
@@ -53,45 +57,10 @@
     </thead>
 
     <tbody>
-
-    {% for data_key in data_keys %}
-    <tr id="{{data_key.digest}}">
-        <td>
-            <span style='display:none;'>
-              <!-- hack for correct sorting -->
-                {{data_key.output_from_record.timestamp|date:"YmdHis"}}
-            </span>
-                {{data_key.output_from_record.timestamp|date:"d/m/Y H:i:s"}}
-        </td>
-        <td>
-            <a href="/{{project.id}}/data/datafile?path={{data_key.path|urlencode}}&digest={{data_key.digest}}&creation={{data_key.creation|date:"c"}}" title="{{data_key.path|urlencode}}">
-                <img src="/static/{{data_key.path|urlencode}}" style="width:250px">
-            </a>
-        </td>
-        <td>
-            <a href="/{{project.id}}/{{data_key.output_from_record.label}}/">
-                {{data_key.output_from_record.label|ubreak}}
-            </a>
-        </td>
-        <td title="{{data_key.output_from_record.reason}}">
-            {{data_key.output_from_record.reason|truncatechars:400 }}
-        </td>
-        <td title="{{data_key.output_from_record.outcome}}">
-            {{data_key.output_from_record.outcome|truncatechars:400 }}
-        </td>
-        <!-- <td>
-            {{data_key.output_from_record.parameters.to_sumatra }}
-        </td> -->
-        <td id="id_button_tags">
-            {% for tag in data_key.output_from_record.tag_objects %}
-                <button class="btn btn-default btn-xs tag" value="{{tag}}">{{tag}}</button>
-            {% endfor %}
-        </td>
-    </tr>
-    {% endfor %}
-
     <tbody>
 </table>
+
+<div id="thumbgrid" class="container hidden"></div>
 
 {% endblock %}
 
@@ -120,18 +89,46 @@ $.fn.dataTable.ext.search.push(
 $(document).ready(function() {
     $('#nav-image').addClass('active');
 
-    var table = $('#data-keys').dataTable( {
-        "info": false,
-        "deferRender": true,
-        // "dom": 'ftlp',
-        "order": [[ 0, "desc" ]]
-    } );
+    var table = $('#images-table').dataTable({
+        "processing":       true,
+        "serverSide":       true,
+        "ajax": {
+            "url": "/{{project.id}}/datatable/image",
+            "data": function ( d ) {
+                d.tag = selected_tag;
+            }
+        },
+        // "dom":           'ftlp',
+        "order":            [[ 0, "desc" ]],
+        "fnPreDrawCallback": function (oSettings) {
+              // create a thumbs container if it doesn't exist. put it in the dataTables_scrollbody div
+              if ($('#thumbs_container').length < 1)  $('#thumbgrid').append("<div id='thumbs_container' class='row'></div>");
 
-    $('#data-keys tbody').on( 'click', 'tr', function () {
-        $(this).toggleClass('info');
-    } );
+              // clear out the thumbs container
+              $('#thumbs_container').html('');
+
+              return true;
+              },
+            "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
+                  $('#thumbs_container').append(aData[1]);
+                  $('.thumb div').addClass('thumbnail')
+
+                  return nRow;
+              },
+    });
+
+    $('#thumbgrid-view').on('click', function() {
+        $('#images-table').addClass('hidden')
+        $('#thumbgrid').removeClass('hidden')
+    })
+
+    $('#image-table-view').on('click', function() {
+        $('#images-table').removeClass('hidden')
+        $('#thumbgrid').addClass('hidden')
+    })
+
     /* select tag from dropdown menu */
-    $('.tag').click(function () {
+    $('.tag').on('click', function () {
         if ( selected_tag == $(this).attr('value') ) {
             selected_tag = 'null';
         } else {
@@ -146,7 +143,7 @@ $(document).ready(function() {
             $("#tagList #id_tag_"+selected_tag).addClass('selected');
             $('#tag-label').html(selected_tag);
         }
-        table.fnDraw();
+        table.draw();
         $('#id_button_tags .tag').removeClass("active");
         $('#id_button_tags .tag[value='+ selected_tag+']').addClass("active");
     });
