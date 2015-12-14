@@ -15,7 +15,6 @@ from django.conf import settings as django_settings
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
 from django.views.generic.list import ListView
-from django.template import defaultfilters as filters
 try:
     from django.views.generic.dates import MonthArchiveView
 except ImportError:  # older versions of Django
@@ -343,16 +342,31 @@ def datatable_data(request, project):
 
     data = []
     for dk in datakeys[start:start+length]:
-        data.append([
-            '%s' % os.path.dirname(dk.path),
-            '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
-                %(project,dk.path,dk.digest,dk.creation,os.path.basename(dk.path)),
-            '<span title="%s">%s...</span>' % (dk.digest, dk.digest[:8]),
-            '%s' % (filters.filesizeformat(dk.get_metadata()['size'])),
-            '<span style="display:none">%s</span>%s' % (dk.creation.strftime('%Y%m%d%H%M%S'),dk.creation.strftime('%d/%m/%Y %H:%M:%S')),
-            '<a href="/%s/%s/">%s</a>' % (project,dk.output_from_record.label,dk.output_from_record.label),
-            ' '.join(map(lambda x: '<a href="/%s/%s/">%s</a>' % (project,x.label,x.label), dk.input_to_records.all()))
-            ])
+        data.append({
+            'DT_RowId':             dk.path,
+            'project':              project,
+            'path':                 dk.path,
+            'directory':            os.path.dirname(dk.path),
+            'filename':             os.path.basename(dk.path),
+            'digest':               dk.digest,
+            'size':                 dk.get_metadata()['size'],
+            # 'size':                 filters.filesizeformat(dk.get_metadata()['size']),
+            'creation':             dk.creation.strftime('%Y-%m-%d %H:%M:%S'),
+            'output_from_record':   dk.output_from_record.label,
+            'input_to_records':     map(lambda x: x.label, dk.input_to_records.all())
+        })
+
+
+        # data.append([
+        #     '%s' % os.path.dirname(dk.path),
+        #     '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
+        #         %(project,dk.path,dk.digest,dk.creation,os.path.basename(dk.path)),
+        #     '<span title="%s">%s...</span>' % (dk.digest, dk.digest[:8]),
+        #     '%s' % (filters.filesizeformat(dk.get_metadata()['size'])),
+        #     '<span style="display:none">%s</span>%s' % (dk.creation.strftime('%Y%m%d%H%M%S'),dk.creation.strftime('%d/%m/%Y %H:%M:%S')),
+        #     '<a href="/%s/%s/">%s</a>' % (project,dk.output_from_record.label,dk.output_from_record.label),
+        #     ' '.join(map(lambda x: '<a href="/%s/%s/">%s</a>' % (project,x.label,x.label), dk.input_to_records.all()))
+        #     ])
 
     response_json = json.dumps({
         "draw": draw,
@@ -395,21 +409,37 @@ def datatable_image(request, project):
 
     data = []
     for im in images[start:start+length]:
-        data.append([
-            '<span style="display:none">%s</span>%s' %(im.creation.strftime('%Y%m%d%H%M%S'),im.creation.strftime('%d/%m/%Y %H:%M:%S')),
-            '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
+        data.append({
+            'project':  project,
+            'date':     im.creation.strftime('%Y-%m-%d %H:%M:%S'),
+            'creation': im.creation.strftime('%Y-%m-%dT%H:%M:%S'),
+            'path':     im.path,
+            'digest':   im.digest,
+            'record':   im.output_from_record.label,
+            'reason':   im.output_from_record.reason,
+            'outcome':  im.output_from_record.outcome,
+            'tags':     im.output_from_record.tags,
+            'thumbgrid': '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
                 <img src="/static/%s" style="width:250px">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
-            '<a href="/%s/%s/">%s</a>' % (project, im.output_from_record.label, im.output_from_record.label),
-            '<span title="%s">%s...</span>' % (im.output_from_record.reason,im.output_from_record.reason[:300]),
-            '<span title="%s">%s...</span>' % (im.output_from_record.outcome,im.output_from_record.outcome[:300])
-            ])
 
-        # Create buttons for tags
-        tags = []
-        if im.output_from_record.tags != '':
-            for tag in im.output_from_record.tags.split(','):
-                tags.append('<button class="btn btn-default btn-xs tag">%s</button>' %tag)
-        data[-1].append(' '.join(tags))
+        })
+
+
+        # data.append([
+        #     '<span style="display:none">%s</span>%s' %(im.creation.strftime('%Y%m%d%H%M%S'),im.creation.strftime('%d/%m/%Y %H:%M:%S')),
+        #     '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
+        #         <img src="/static/%s" style="width:250px">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
+        #     '<a href="/%s/%s/">%s</a>' % (project, im.output_from_record.label, im.output_from_record.label),
+        #     '<span title="%s">%s...</span>' % (im.output_from_record.reason,im.output_from_record.reason[:300]),
+        #     '<span title="%s">%s...</span>' % (im.output_from_record.outcome,im.output_from_record.outcome[:300])
+        #     ])
+        #
+        # # Create buttons for tags
+        # tags = []
+        # if im.output_from_record.tags != '':
+        #     for tag in im.output_from_record.tags.split(','):
+        #         tags.append('<button class="btn btn-default btn-xs tag">%s</button>' %tag)
+        # data[-1].append(' '.join(tags))
 
     response_json = json.dumps({
         "draw": draw,

@@ -37,14 +37,55 @@
     <script type="text/javascript" language="javascript" src="/static/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" language="javascript" src="/static/js/dataTables.bootstrap.js"></script>
     <script type="text/javascript">
+Object.defineProperty(Number.prototype,'fileSize',{value:function(a,b,c,d){
+    return (a=a?[1e3,'k','B']:[1024,'K','iB'],b=Math,c=b.log,
+        d=c(this)/c(a[0])|0,this/b.pow(a[0],d)).toFixed(2)
+        +' '+(d?(a[1]+'MGTPEZY')[--d]+a[2]:'Bytes');
+    },writable:false,enumerable:false});
+
 $(document).ready(function() {
     $('#nav-data').addClass('active');
+
+    // Column Renderer
+    columnDefs = [
+        {"render": function(data, type, row) {
+            return '<a href="/'+row.project+'/data/datafile?'+
+                'path='+row.path+'&digest='+row.digest+
+                '&creation='+row.creation+'">'+data+'</a>';
+        }, "targets": [1]},                                                     // filename
+        {"render": function(data, type, row) {
+            return '<span title="'+data+'">'+data.slice(0,8)+'...</span>'
+        }, "targets": [2]},                                                     // digest
+        {"render": function(data, type, row) {
+            return data.fileSize(1);
+        }, "targets": [3]},                                                     // size
+        {"render": function(data, type, row) {
+            return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>'
+        }, "targets": [5]},                                                     // output from record
+        {"render": function(data, type, row) {
+            var rendered_data = [];
+            for (var i=0;i<data.length;i++) {
+                rendered_data.push('<a href="/'+row.project+'/'+data[i]+'/">'+data[i]+'</a>')
+            }
+            return rendered_data.join(' ');
+        }, "targets": [6]},                                                     // input to record
+    ]
 
     var table = $('#data-keys').dataTable( {
         "processing":       true,
         "serverSide":       true,
         "ajax":             "/{{project.id}}/datatable/data",
-        "order":            [[ 4, "desc" ]]
+        "columns": [
+            { "data": "directory" },
+            { "data": "filename" },
+            { "data": "digest" },
+            { "data": "size" },
+            { "data": "creation" },
+            { "data": "output_from_record" },
+            { "data": "input_to_records" }
+        ],
+        "order":            [[ 4, "desc" ]],
+        "columnDefs":       columnDefs,
     } );
 
     $('#data-keys tbody').on( 'click', 'tr', function () {

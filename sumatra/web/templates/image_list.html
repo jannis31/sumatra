@@ -89,6 +89,35 @@ $.fn.dataTable.ext.search.push(
 $(document).ready(function() {
     $('#nav-image').addClass('active');
 
+
+    // Column Renderer
+    columnDefs = [
+        {"render": function(data, type, row) {
+            return '<div class="col-md-3 col-sm-4 col-xs-6 thumb">'+
+                '<div class=""><a href="/'+row.project+'/data/datafile?'+
+                'path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" title="'+row.path+'">'+
+                '<img src="/static/'+row.path+'" style="width:250px">  </a></div></div>'
+        }, "targets": [1]},                                                     // image
+        {"render": function(data, type, row) {
+            return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>'
+        }, "targets": [2]},                                                     // record
+        {"render": function(data, type, row) {
+            if (data.length < 200) {
+                return data
+            } else {
+                return '<span title="'+data+'">'+data.slice(0,200)+'...</span>'
+            }
+        }, "targets": [3,4]},                                                   // reason,outcome
+        {"render": function(data, type, row) {
+            if (data.length == 0) {
+                return ''
+            } else {
+                tags = data.split(',')
+                return '<button class="btn btn-default btn-xs tag">'+tags.join('</button> <button class="btn btn-default btn-xs tag">')+'</button>';
+            }
+        }, "targets": [5]},                                                     // tags
+    ]
+
     var table = $('#images-table').dataTable({
         "processing":       true,
         "serverSide":       true,
@@ -98,9 +127,18 @@ $(document).ready(function() {
                 d.tag = selected_tag;
             }
         },
+        "columns": [
+            { "data": "date" },
+            { "data": "image" },
+            { "data": "record" },
+            { "data": "reason" },
+            { "data": "outcome" },
+            { "data": "tags" },
+        ],
         "aLengthMenu": [[8, 32, 128], [8, 32, 128]],
         // "dom":           'ftlp',
         "order":            [[ 0, "desc" ]],
+        "columnDefs":       columnDefs,
         "fnPreDrawCallback": function (oSettings) {
               // create a thumbs container if it doesn't exist. put it in the dataTables_scrollbody div
               if ($('#thumbs_container').length < 1)  $('#thumbgrid').append("<div id='thumbs_container' class='row'></div>");
@@ -111,7 +149,7 @@ $(document).ready(function() {
               return true;
           },
         "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-              $('#thumbs_container').append(aData[1]);
+              $('#thumbs_container').append(aData['thumbgrid']);
               $('.thumb div').addClass('thumbnail')
 
               return nRow;
