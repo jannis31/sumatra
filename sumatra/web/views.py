@@ -114,7 +114,7 @@ class ParameterListView(DetailView):
         main_file = self.request.GET.get('main_file','')
         if main_file:
             context['selected_main_file'] = main_file
-            context['columns'] = self.object.get_columns(main_file)
+            context['columns'] = map(str, ['Label', 'Date', 'Version'] + self.object.get_columns(main_file))
         return context
 
 #
@@ -495,9 +495,9 @@ def datatable_parameter(request, project):
                 pass
 
             dd['project'] = project
-            dd['label'] = record.label
-            dd['date'] = record.timestamp.strftime('%Y-%m-%d %H:%M:%S')
-            dd['version'] = record.version
+            dd['Label'] = record.label
+            dd['Date'] = record.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            dd['Version'] = record.version
 
         if search_value != '':
             search_queries = search_value.split(' ')

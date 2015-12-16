@@ -97,8 +97,7 @@ class Project(BaseModel):
             columns.extend(parameter_set.keys())
         columns = list(set(columns))
         columns.sort()
-        columns = ['label', 'date', 'version'] + columns
-        return map(str, columns)
+        return columns
 
 
 class Executable(BaseModel):
