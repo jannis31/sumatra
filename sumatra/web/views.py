@@ -502,7 +502,15 @@ def datatable_parameter(request, project):
         if search_value != '':
             search_queries = search_value.split(' ')
             for sq in search_queries:
-                data = filter(lambda x: filter(lambda y: sq in str(y), x.values()), data)
+                if ':' in sq:
+                    try:
+                        col,val = sq.split(':')
+                        if col and val:
+                            data = filter(lambda x: val in str(x[col]), data)
+                    except:
+                        pass
+                else:
+                    data = filter(lambda x: filter(lambda y: sq in str(y), x.values()), data)
         data = sorted(data, key=operator.itemgetter(columns[order]))
         if order_dir == 'desc':
             data.reverse()
