@@ -500,7 +500,9 @@ def datatable_parameter(request, project):
             dd['version'] = record.version
 
         if search_value != '':
-            data = filter(lambda x: filter(lambda y: search_value in str(y), x.values()), data)
+            search_queries = search_value.split(' ')
+            for sq in search_queries:
+                data = filter(lambda x: filter(lambda y: sq in str(y), x.values()), data)
         data = sorted(data, key=operator.itemgetter(columns[order]))
         if order_dir == 'desc':
             data.reverse()
