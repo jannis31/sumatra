@@ -83,9 +83,22 @@ class Project(BaseModel):
     def last_updated(self):
         return self.record_set.all().aggregate(models.Max('timestamp'))["timestamp__max"] or datetime(1970, 1, 1, 0, 0, 0)
 
-
     def get_main_files(self):
-        return list(set([str(record.main_file) for record in self.record_set.all()]))
+        return list(set(map(lambda x: str(x.main_file), self.record_set.all())))
+
+    def get_columns(self, main_file):
+        records = self.record_set.filter(main_file=main_file)
+        columns = []
+        for record in records:
+            parameter_set = record.parameters.to_sumatra()
+            if hasattr(parameter_set, "as_dict"):
+                parameter_set = parameter_set.as_dict()
+            parameter_set = parameters.nesteddictflatten(parameter_set, separator='__')
+            columns.extend(parameter_set.keys())
+        columns = list(set(columns))
+        columns.sort()
+        columns = ['label', 'date', 'version'] + columns
+        return map(str, columns)
 
 
 class Executable(BaseModel):

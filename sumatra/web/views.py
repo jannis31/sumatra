@@ -11,6 +11,7 @@ from builtins import str
 
 import parameters
 import mimetypes
+import operator
 from django.conf import settings as django_settings
 from django.http import HttpResponse, Http404
 from django.shortcuts import render_to_response
@@ -36,6 +37,11 @@ mimetypes.init()
 
 _label_db = django_settings.LABEL_DB
 
+import pprint
+
+#
+# ListView
+#
 
 class ProjectListView(ListView):
     model = Project
@@ -49,17 +55,84 @@ class ProjectListView(ListView):
         return projects
 
 
+class RecordListView(DetailView):
+    context_object_name = 'project'
+    template_name = 'record_list.html'
+
+    def get_object(self):
+        return Project.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .get(pk=self.kwargs["project"])
+
+    def get_context_data(self, **kwargs):
+        context = super(RecordListView, self).get_context_data(**kwargs)
+        context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
+        context['read_only'] = django_settings.READ_ONLY
+        return context
+
+
+class DataListView(DetailView):
+    context_object_name = 'project'
+    template_name = 'data_list.html'
+
+    def get_object(self):
+        return Project.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .get(pk=self.kwargs["project"])
+
+    def get_context_data(self, **kwargs):
+        context = super(DataListView, self).get_context_data(**kwargs)
+        return context
+
+
+class ImageListView(DetailView):
+    context_object_name = 'project'
+    template_name = 'image_list.html'
+
+    def get_object(self):
+        return Project.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .get(pk=self.kwargs["project"])
+
+    def get_context_data(self, **kwargs):
+        context = super(ImageListView, self).get_context_data(**kwargs)
+        context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
+        return context
+
+
+class ParameterListView(DetailView):
+    context_object_name = 'project'
+    template_name = 'parameter_list.html'
+
+    def get_object(self):
+        return Project.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .get(pk=self.kwargs["project"])
+
+    def get_context_data(self, **kwargs):
+        context = super(ParameterListView, self).get_context_data(**kwargs)
+        main_file = self.request.GET.get('main_file','')
+        if main_file:
+            context['selected_main_file'] = main_file
+            context['columns'] = self.object.get_columns(main_file)
+        return context
+
+#
+# DetailView
+#
+
+def unescape(label):
+    return label.replace("||", "/")
+
+
 class ProjectDetailView(DetailView):
     context_object_name = 'project'
     template_name = 'project_detail.html'
 
     def get_object(self):
-        return Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
-
-    def get_context_data(self, **kwargs):
-        context = super(ProjectDetailView, self).get_context_data(**kwargs)
-        context['read_only'] = django_settings.READ_ONLY
-        return context
+        return Project.objects \
+            .using(_label_db.get(self.kwargs["project"],'default')) \
+            .get(pk=self.kwargs["project"])
 
     def get_context_data(self, **kwargs):
         context = super(ProjectDetailView, self).get_context_data(**kwargs)
@@ -79,23 +152,6 @@ class ProjectDetailView(DetailView):
             project.name = name
             project.save()
         return HttpResponse('OK')
-
-
-class RecordListView(ListView):
-    context_object_name = 'project'
-    template_name = 'record_list.html'
-
-    def get_queryset(self):
-        return Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
-
-    def get_context_data(self, **kwargs):
-        context = super(RecordListView, self).get_context_data(**kwargs)
-        context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
-        context['read_only'] = django_settings.READ_ONLY
-        return context
-
-def unescape(label):
-    return label.replace("||", "/")
 
 
 class RecordDetailView(DetailView):
@@ -127,20 +183,6 @@ class RecordDetailView(DetailView):
                 setattr(record, attr, value)
         record.save()
         return HttpResponse('OK')
-
-
-class DataListView(ListView):
-    context_object_name = 'project'
-    template_name = 'data_list.html'
-
-    def get_queryset(self):
-        return Project.objects \
-            .using(_label_db.get(self.kwargs["project"],'default')) \
-            .get(pk=self.kwargs["project"])
-
-    def get_context_data(self, **kwargs):
-        context = super(DataListView, self).get_context_data(**kwargs)
-        return context
 
 
 class DataDetailView(DetailView):
@@ -230,23 +272,9 @@ class DataDetailView(DetailView):
         template_name = template_dispatch.get(mimetype, 'data_detail_base.html')
         return template_name
 
-
-class ImageListView(ListView):
-    context_object_name = 'data_keys'
-    template_name = 'image_list.html'
-
-    def get_queryset(self):
-        return DataKey.objects \
-            .using(_label_db.get(self.kwargs["project"],'default')) \
-            .filter(output_from_record__project_id=self.kwargs["project"]) \
-            .filter(metadata__contains='image')
-
-    def get_context_data(self, **kwargs):
-        context = super(ImageListView, self).get_context_data(**kwargs)
-        context['project'] = Project.objects.using(_label_db.get(self.kwargs["project"],'default')).get(pk=self.kwargs["project"])
-        context['tags'] = Tag.objects.using(_label_db.get(self.kwargs["project"],'default')).all()  # would be better to filter, to return only tags used in this project.
-        return context
-
+#
+# Ajax request for datatable
+#
 
 def datatable_record(request, project):
     columns = ['label', 'timestamp', 'reason', 'outcome', 'input_data', 'output_data',
@@ -286,23 +314,26 @@ def datatable_record(request, project):
 
     data = []
     for rec in records[start:start+length]:
-        data.append({
-            'DT_RowId':     rec.label,
-            'project':      project,
-            'label':        rec.label,
-            'date':         rec.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
-            'reason':       rec.reason,
-            'outcome':      rec.outcome,
-            'input_data':   map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.input_data.all()),
-            'output_data':  map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.output_data.all()),
-            'duration':     rec.duration,
-            'processes':    rec.launch_mode.get_parameters().get('n',1),
-            'executable':   rec.executable.name,
-            'main_file':    rec.main_file,
-            'version':      rec.version,
-            'arguments':    rec.script_arguments,
-            'tags':         rec.tags,
-        })
+        try:
+            data.append({
+                'DT_RowId':     rec.label,
+                'project':      project,
+                'label':        rec.label,
+                'date':         rec.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+                'reason':       rec.reason,
+                'outcome':      rec.outcome,
+                'input_data':   map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.input_data.all()),
+                'output_data':  map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.output_data.all()),
+                'duration':     rec.duration,
+                'processes':    rec.launch_mode.get_parameters().get('n',1),
+                'executable':   rec.executable.name,
+                'main_file':    rec.main_file,
+                'version':      rec.version,
+                'arguments':    rec.script_arguments,
+                'tags':         rec.tags,
+            })
+        except:
+            pass
 
     response_json = json.dumps({
         "draw": draw,
@@ -312,7 +343,6 @@ def datatable_record(request, project):
         })
 
     return HttpResponse(response_json,content_type="application/json")
-
 
 
 def datatable_data(request, project):
@@ -342,31 +372,22 @@ def datatable_data(request, project):
 
     data = []
     for dk in datakeys[start:start+length]:
-        data.append({
-            'DT_RowId':             dk.path,
-            'project':              project,
-            'path':                 dk.path,
-            'directory':            os.path.dirname(dk.path),
-            'filename':             os.path.basename(dk.path),
-            'digest':               dk.digest,
-            'size':                 dk.get_metadata()['size'],
-            # 'size':                 filters.filesizeformat(dk.get_metadata()['size']),
-            'creation':             dk.creation.strftime('%Y-%m-%d %H:%M:%S'),
-            'output_from_record':   dk.output_from_record.label,
-            'input_to_records':     map(lambda x: x.label, dk.input_to_records.all())
-        })
-
-
-        # data.append([
-        #     '%s' % os.path.dirname(dk.path),
-        #     '<a href="/%s/data/datafile?path=%s&digest=%s&creation=%s">%s</a>' \
-        #         %(project,dk.path,dk.digest,dk.creation,os.path.basename(dk.path)),
-        #     '<span title="%s">%s...</span>' % (dk.digest, dk.digest[:8]),
-        #     '%s' % (filters.filesizeformat(dk.get_metadata()['size'])),
-        #     '<span style="display:none">%s</span>%s' % (dk.creation.strftime('%Y%m%d%H%M%S'),dk.creation.strftime('%d/%m/%Y %H:%M:%S')),
-        #     '<a href="/%s/%s/">%s</a>' % (project,dk.output_from_record.label,dk.output_from_record.label),
-        #     ' '.join(map(lambda x: '<a href="/%s/%s/">%s</a>' % (project,x.label,x.label), dk.input_to_records.all()))
-        #     ])
+        try:
+            data.append({
+                'DT_RowId':             dk.path,
+                'project':              project,
+                'path':                 dk.path,
+                'directory':            os.path.dirname(dk.path),
+                'filename':             os.path.basename(dk.path),
+                'digest':               dk.digest,
+                'size':                 dk.get_metadata()['size'],
+                # 'size':                 filters.filesizeformat(dk.get_metadata()['size']),
+                'creation':             dk.creation.strftime('%Y-%m-%d %H:%M:%S'),
+                'output_from_record':   dk.output_from_record.label,
+                'input_to_records':     map(lambda x: x.label, dk.input_to_records.all())
+            })
+        except:
+            pass
 
     response_json = json.dumps({
         "draw": draw,
@@ -409,37 +430,23 @@ def datatable_image(request, project):
 
     data = []
     for im in images[start:start+length]:
-        data.append({
-            'project':  project,
-            'date':     im.creation.strftime('%Y-%m-%d %H:%M:%S'),
-            'creation': im.creation.strftime('%Y-%m-%dT%H:%M:%S'),
-            'path':     im.path,
-            'digest':   im.digest,
-            'record':   im.output_from_record.label,
-            'reason':   im.output_from_record.reason,
-            'outcome':  im.output_from_record.outcome,
-            'tags':     im.output_from_record.tags,
-            'thumbgrid': '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
-                <img src="/static/%s" style="width:250px">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
+        try:
+            data.append({
+                'project':  project,
+                'date':     im.creation.strftime('%Y-%m-%d %H:%M:%S'),
+                'creation': im.creation.strftime('%Y-%m-%dT%H:%M:%S'),
+                'path':     im.path,
+                'digest':   im.digest,
+                'record':   im.output_from_record.label,
+                'reason':   im.output_from_record.reason,
+                'outcome':  im.output_from_record.outcome,
+                'tags':     im.output_from_record.tags,
+                'thumbgrid': '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
+                    <img src="/static/%s" style="width:250px">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
 
-        })
-
-
-        # data.append([
-        #     '<span style="display:none">%s</span>%s' %(im.creation.strftime('%Y%m%d%H%M%S'),im.creation.strftime('%d/%m/%Y %H:%M:%S')),
-        #     '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
-        #         <img src="/static/%s" style="width:250px">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
-        #     '<a href="/%s/%s/">%s</a>' % (project, im.output_from_record.label, im.output_from_record.label),
-        #     '<span title="%s">%s...</span>' % (im.output_from_record.reason,im.output_from_record.reason[:300]),
-        #     '<span title="%s">%s...</span>' % (im.output_from_record.outcome,im.output_from_record.outcome[:300])
-        #     ])
-        #
-        # # Create buttons for tags
-        # tags = []
-        # if im.output_from_record.tags != '':
-        #     for tag in im.output_from_record.tags.split(','):
-        #         tags.append('<button class="btn btn-default btn-xs tag">%s</button>' %tag)
-        # data[-1].append(' '.join(tags))
+            })
+        except:
+            pass
 
     response_json = json.dumps({
         "draw": draw,
@@ -449,6 +456,63 @@ def datatable_image(request, project):
         })
 
     return HttpResponse(response_json,content_type="application/json")
+
+
+def datatable_parameter(request, project):
+
+    response = {
+        "draw": int(request.GET['draw']),
+        "recordsTotal": 0,
+        "recordsFiltered": 0,
+        "data": []
+        }
+
+    main_file = request.GET.get('main_file', None)
+    if main_file:
+        columns = request.GET.getlist('columns[]', [])
+        search_value = request.GET['search[value]']
+        order = int(request.GET['order[0][column]'])
+        order_dir =request.GET['order[0][dir]']
+        length = int(request.GET['length'])
+        start = int(request.GET['start'])
+
+        records = Record.objects \
+            .using(_label_db.get(project,'default')) \
+            .filter(project_id=project, main_file=main_file)
+
+        data = []
+        for record in records:
+            try:
+                parameter_set = record.parameters.to_sumatra()
+                if hasattr(parameter_set, "as_dict"):
+                    parameter_set = parameter_set.as_dict()
+                parameter_set = parameters.nesteddictflatten(parameter_set, separator='__')
+                dd = {}
+                for column in columns:
+                    dd[column] = parameter_set.get(column,'')
+                data.append(dd)
+            except:
+                pass
+
+            dd['project'] = project
+            dd['label'] = record.label
+            dd['date'] = record.timestamp.strftime('%Y-%m-%d %H:%M:%S')
+            dd['version'] = record.version
+
+        if search_value != '':
+            data = filter(lambda x: filter(lambda y: search_value in str(y), x.values()), data)
+        data = sorted(data, key=operator.itemgetter(columns[order]))
+        if order_dir == 'desc':
+            data.reverse()
+
+        response.update({
+            'data':             data[start:start+length],
+            'recordsTotal':     len(records),
+            'recordsFiltered':  len(data),
+            'columns':          columns,
+        })
+
+    return HttpResponse(json.dumps(response),content_type="application/json")
 
 
 def parameter_list(request, project):
@@ -476,7 +540,7 @@ def parameter_list(request, project):
     else:
         return render_to_response('parameter_list.html',{'project':project_obj})
 
-
+# unused
 def image_thumbgrid(request, project):
     project_obj = Project.objects.using(_label_db.get(project,'default')).get(id=project)
     if request.is_ajax():
