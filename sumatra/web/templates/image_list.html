@@ -94,10 +94,10 @@ $(document).ready(function() {
     columnDefs = [
         {"render": function(data, type, row) {
             return '<div class="col-md-3 col-sm-4 col-xs-6 thumb">'+
-                '<div class="thumbnail"><a href="/'+row.project+'/data/datafile?'+
+                '<div class=""><a href="/'+row.project+'/data/datafile?'+
                 'path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" title="'+row.path+'">'+
                 '<img src="/static/'+row.path+'"></a></div></div>'
-        }, "targets": [1]},                                                     // image
+        }, "sWidth": 20%, "targets": [1]},                                                     // image
         {"render": function(data, type, row) {
             return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>'
         }, "targets": [2]},                                                     // record
@@ -150,6 +150,8 @@ $(document).ready(function() {
           },
         "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
               $('#thumbs_container').append(aData['thumbgrid']);
+              $('.thumb div').addClass('thumbnail')
+
               return nRow;
           },
     });
