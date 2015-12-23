@@ -432,16 +432,17 @@ def datatable_image(request, project):
     for im in images[start:start+length]:
         try:
             data.append({
-                'project':  project,
-                'date':     im.creation.strftime('%Y-%m-%d %H:%M:%S'),
-                'creation': im.creation.strftime('%Y-%m-%dT%H:%M:%S'),
-                'path':     im.path,
-                'digest':   im.digest,
-                'record':   im.output_from_record.label,
-                'reason':   im.output_from_record.reason,
-                'outcome':  im.output_from_record.outcome,
-                'tags':     im.output_from_record.tags,
-                'thumbgrid': '<div class="thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
+                'project':      project,
+                'date':         im.creation.strftime('%Y-%m-%d %H:%M:%S'),
+                'creation':     im.creation.strftime('%Y-%m-%dT%H:%M:%S'),
+                'path':         im.path,
+                'digest':       im.digest,
+                'record':       im.output_from_record.label,
+                'reason':       im.output_from_record.reason,
+                'outcome':      im.output_from_record.outcome,
+                'parameters':   im.output_from_record.parameters,
+                'tags':         im.output_from_record.tags,
+                'thumbgrid':    '<div class="thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
                     <img src="/static/%s">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
 
             })
