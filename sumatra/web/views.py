@@ -440,7 +440,7 @@ def datatable_image(request, project):
                 'record':       im.output_from_record.label,
                 'reason':       im.output_from_record.reason,
                 'outcome':      im.output_from_record.outcome,
-                'parameters':   im.output_from_record.parameters,
+                'parameters':   im.output_from_record.parameters.to_sumatra(),
                 'tags':         im.output_from_record.tags,
                 'thumbgrid':    '<div class="thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
                     <img src="/static/%s">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
