@@ -95,10 +95,9 @@ $(document).ready(function() {
     // Column Renderer
     columnDefs = [
         {"render": function(data, type, row) {
-            return '<div class="col-md-3 col-sm-4 col-xs-6 thumb">'+
-                '<div class=""><a href="/'+row.project+'/data/datafile?'+
+            return '<div class=""><a href="/'+row.project+'/data/datafile?'+
                 'path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" title="'+row.path+'">'+
-                '<img src="/static/'+row.path+'" style="width:250px">  </a></div></div>'
+                '<img src="/static/'+row.path+'" style="width:250px">  </a></div>'
         }, "targets": [1]},                                                     // image
         {"render": function(data, type, row) {
             return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>'
@@ -168,7 +167,7 @@ $(document).ready(function() {
 
     $('#thumbgrid-view-large').on('click', function() {
         $('#images-table').addClass('hidden')
-        thumbgrid_view = 'col-sm-6 col-xs-12'
+        thumbgrid_view = 'col-md-6 col-sm-12'
         $('.thumb').removeClass().addClass('thumb').addClass(thumbgrid_view)
         $('#thumbgrid').removeClass('hidden')
     })
