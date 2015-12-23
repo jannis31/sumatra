@@ -97,7 +97,7 @@ $(document).ready(function() {
                 '<div class=""><a href="/'+row.project+'/data/datafile?'+
                 'path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" title="'+row.path+'">'+
                 '<img src="/static/'+row.path+'"></a></div></div>'
-        }, "sWidth": "250px", "targets": [1]},                                                     // image
+        }, "width": "250px", "targets": [1]},                                                     // image
         {"render": function(data, type, row) {
             return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>'
         }, "targets": [2]},                                                     // record
