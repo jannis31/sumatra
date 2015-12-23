@@ -428,7 +428,6 @@ def datatable_image(request, project):
                 )
     images = images.order_by(order_dir+columns[order])                        # Ordering
 
-    import pdb; pdb.set_trace()
     data = []
     for im in images[start:start+length]:
         try:
