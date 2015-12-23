@@ -34,6 +34,8 @@
                     <span class="glyphicon glyphicon-th-list"></span></button>
                 <button class="btn btn-default btn-sm" id="thumbgrid-view">
                     <span class="glyphicon glyphicon-th"></span></button>
+                <button class="btn btn-default btn-sm" id="thumbgrid-view-large">
+                    <span class="glyphicon glyphicon-th-large"></span></button>
             </div>
 {% endblock %}
 
@@ -158,6 +160,13 @@ $(document).ready(function() {
 
     $('#thumbgrid-view').on('click', function() {
         $('#images-table').addClass('hidden')
+        $('.thumb').removeClass().addClass('thumb col-md-3 col-sm-4 col-xs-6')
+        $('#thumbgrid').removeClass('hidden')
+    })
+
+    $('#thumbgrid-view-large').on('click', function() {
+        $('#images-table').addClass('hidden')
+        $('.thumb').removeClass().addClass('thumb col-sm-6 col-xs-12')
         $('#thumbgrid').removeClass('hidden')
     })
 
