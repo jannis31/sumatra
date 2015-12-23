@@ -442,7 +442,7 @@ def datatable_image(request, project):
                 'outcome':  im.output_from_record.outcome,
                 'tags':     im.output_from_record.tags,
                 'thumbgrid': '<div class="col-md-3 col-sm-4 col-xs-6 thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
-                    <img src="/static/%s" style="width:250px">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
+                    <img src="/static/%s">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
 
             })
         except:

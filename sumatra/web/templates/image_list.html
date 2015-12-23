@@ -96,8 +96,8 @@ $(document).ready(function() {
             return '<div class="col-md-3 col-sm-4 col-xs-6 thumb">'+
                 '<div class=""><a href="/'+row.project+'/data/datafile?'+
                 'path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" title="'+row.path+'">'+
-                '<img src="/static/'+row.path+'"></a></div></div>'
-        }, "width": "250px", "targets": [1]},                                                     // image
+                '<img src="/static/'+row.path+'" style="width:250px">  </a></div></div>'
+        }, "targets": [1]},                                                     // image
         {"render": function(data, type, row) {
             return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>'
         }, "targets": [2]},                                                     // record
