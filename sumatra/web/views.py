@@ -428,6 +428,7 @@ def datatable_image(request, project):
                 )
     images = images.order_by(order_dir+columns[order])                        # Ordering
 
+    import pdb; pdb.set_trace()
     data = []
     for im in images[start:start+length]:
         try:
@@ -440,7 +441,7 @@ def datatable_image(request, project):
                 'record':       im.output_from_record.label,
                 'reason':       im.output_from_record.reason,
                 'outcome':      im.output_from_record.outcome,
-                'parameters':   im.output_from_record.parameters.to_sumatra(),
+                'parameters':   im.output_from_record.parameters.content,
                 'tags':         im.output_from_record.tags,
                 'thumbgrid':    '<div class="thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
                     <img src="/static/%s">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
