@@ -54,6 +54,17 @@ def _warning(
     print(message)
 warnings.showwarning = _warning
 
+def _convertStr(s):
+ 	"""Convert string to either int or float or not both."""
+ 	try:
+ 		ret = int(s)
+ 	except ValueError:
+         try:
+             ret = float(s)
+         except ValueError:
+             ret = s
+ 	return ret
+
 def parse_executable_str(exec_str):
     """
     Split the string describing the executable into a path part and an
@@ -425,6 +436,8 @@ def list(argv):  # add 'report' and 'log' as aliases
                         help="FMT can be 'text' (default), 'html', 'json', 'latex' or 'shell'.")
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
                         help="list records in reverse order (default: newest first)"),
+    parser.add_argument('-p', '--parameters', metavar='parameters', default=None, help="filter records by parameter value")
+
     args = parser.parse_args(argv)
 
     project = load_project()
@@ -432,7 +445,19 @@ def list(argv):  # add 'report' and 'log' as aliases
         f = open('.smt/labels', 'w')
         f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
         f.close()
-    print(project.format_records(tags=args.tags, mode=args.mode, format=args.format, reverse=args.reverse))
+
+    kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'reverse':args.reverse}
+
+    if args.parameters:
+        parameters = {}
+        for pp in args.parameters.split(','):
+            for operator in ['=',':']:
+                if operator in pp:
+                    pkey,pval = pp.split(operator)
+                    parameters.update({pkey:_convertStr(pval)})
+        kwargs.update({'parameters':parameters})
+
+    print(project.format_records(**kwargs))
 
 def delete(argv):
     """Delete records or records with a particular tag from a project."""
