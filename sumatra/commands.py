@@ -55,6 +55,17 @@ def _warning(
     print(message)
 warnings.showwarning = _warning
 
+def _convertStr(s):
+ 	"""Convert string to either int or float or not both."""
+ 	try:
+ 		ret = int(s)
+ 	except ValueError:
+         try:
+             ret = float(s)
+         except ValueError:
+             ret = s
+ 	return ret
+
 def parse_executable_str(exec_str):
     """
     Split the string describing the executable into a path part and an
@@ -433,23 +444,27 @@ def list(argv):  # add 'report' and 'log' as aliases
                         help="use version REV of the code. The first 5 characters is sufficent for filtering list of records.")
     parser.add_argument('-p', '--parameter_view', action="store_const", const="parameter_view",
                         dest="mode", help="list records with a set of parameter")
-    parser.add_argument('-f', '--params_filter', metavar='PARAMs_FILTER', default=None, help="filter records by parameter value")
+    parser.add_argument('-f', '--parameters', metavar='parameters', default=None, help="filter records by parameter value")
     #parser.add_argument('-k', '--keyword', metavar='KW', default=None,  help="additional information to label")
     parser.add_argument('-o', '--output_files', action="store_const", const="output_files",
                         dest="mode", help="list output files")
-    parser.add_argument('-w', '--write_labels', action="store_true", dest="write_labels", default=False,
-                        help="write list record labels in .smt/labels")
-
-    args = parser.parse_args(argv)
 
     project = load_project()
-    if args.write_labels:
-        if os.path.exists('.smt'):
-            f = open('.smt/labels', 'w')
-            f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
-            f.close()
-    kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'number':args.number,
-        'params_filter': args.params_filter, 'reverse':args.reverse}
+    if os.path.exists('.smt'):
+        with open('.smt/labels', 'w') as f:
+            f.write('\n'.join(project.get_labels()))
+
+    args = parser.parse_args(argv)
+    kwargs = {'tags':args.tags, 'mode':args.mode, 'format':args.format, 'number':args.number, 'reverse':args.reverse}
+
+    if args.parameters:
+        parameters = {}
+        for pp in args.parameters.split(','):
+            for operator in ['=',':']:
+                if operator in pp:
+                    pkey,pval = pp.split(operator)
+                    parameters.update({pkey:_convertStr(pval)})
+        kwargs.update({'parameters':parameters})
 
     if args.date:
         if ' - ' in args.date:

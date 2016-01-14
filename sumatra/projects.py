@@ -306,17 +306,22 @@ class Project(object):
         self._most_recent = self.record_store.most_recent(self.name)
         return n
 
-    def find_records(self, tags=None, params_filter=None, reverse=False, *args, **kwargs):
+    def get_labels(self, tags=None, reverse=False):
+        labels = self.record_store.labels(self.name, tags=tags)
+        if reverse:
+            labels.reverse()
+        return labels
+
+    def find_records(self, tags=None, reverse=False, parameters=None, *args, **kwargs):
         records = self.record_store.list(self.name, tags, reverse=reverse, *args, **kwargs)
-        if params_filter is not None:
-            for parameter in params_filter.split(','):
-                records = _filter_record_by_param(records,parameter)
+        if parameters is not None:
+            records = [rec for rec in records if len(rec.parameters.diff(parameters)[-1]) == 0]
         return records
 
     # def find_data() here?
 
-    def format_records(self, format='text', mode='short', tags=None, reverse=False, keyword=None, params_filter=None, *args, **kwargs):
-        records = self.find_records(tags=tags, params_filter=params_filter, reverse=reverse, *args, **kwargs)
+    def format_records(self, format='text', mode='short', tags=None, reverse=False, keyword=None, parameters=None, *args, **kwargs):
+        records = self.find_records(tags=tags, reverse=reverse, parameters=parameters,*args, **kwargs)
         formatter = get_formatter(format)(records, project=self, tags=tags)
         return formatter.format(mode,keyword=keyword)
 
