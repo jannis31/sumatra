@@ -427,7 +427,7 @@ def list(argv):  # add 'report' and 'log' as aliases
     parser = ArgumentParser(usage=usage,
                             description=description)
     parser.add_argument('tags', metavar='TAGS', nargs='*')
-    parser.add_argument('-l', '--long', action="store_const", const="long",
+    parser.add_argument('-L', '--long', action="store_const", const="long",
                         dest="mode", default="short",
                         help="prints full information for each record")
     parser.add_argument('-T', '--table', action="store_const", const="table",
@@ -435,19 +435,19 @@ def list(argv):  # add 'report' and 'log' as aliases
     parser.add_argument('-F', '--format', metavar='FMT', choices=['text', 'html', 'latex', 'shell', 'json', 'csv', 'tsv'],
                         default='text',
                         help="FMT can be 'text' (default), 'html', 'json', 'latex' or 'shell'.")
+    parser.add_argument('-P', '--parameter_view', action="store_const", const="parameter_view",
+                        dest="mode", help="list records with a set of parameter")
+    parser.add_argument('-O', '--output_files', action="store_const", const="output_files",
+                        dest="mode", help="list output files")
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
                         help="list records in reverse order (default: newest first)")
-    parser.add_argument('-m', '--main_file', help="the name of the script for filtering list of records.")
     parser.add_argument('-n', '--number', help="display the last NUMBER of records")
-    parser.add_argument('-d', '--date', help="the date (YYYY-MM-DD) for filtering list of records. ")
-    parser.add_argument('-v', '--version', metavar='REV',
-                        help="use version REV of the code. The first 5 characters is sufficent for filtering list of records.")
-    parser.add_argument('-p', '--parameter_view', action="store_const", const="parameter_view",
-                        dest="mode", help="list records with a set of parameter")
-    parser.add_argument('-f', '--parameters', metavar='parameters', default=None, help="filter records by parameter value")
+    parser.add_argument('-l', '--label', default=None, help="print record info by LABEL.")
+    parser.add_argument('-m', '--main_file', default=None, help="the name of the script for filtering list of records.")
+    parser.add_argument('-d', '--date', default=None, help="the date (YYYY-MM-DD) for filtering list of records. ")
+    parser.add_argument('-v', '--version', help="use version VERSION of the code. The first 5 characters is sufficent for filtering list of records.")
+    parser.add_argument('-p', '--parameters', default=None, help="filter records by parameter value")
     #parser.add_argument('-k', '--keyword', metavar='KW', default=None,  help="additional information to label")
-    parser.add_argument('-o', '--output_files', action="store_const", const="output_files",
-                        dest="mode", help="list output files")
 
     project = load_project()
     if os.path.exists('.smt'):
@@ -479,6 +479,7 @@ def list(argv):  # add 'report' and 'log' as aliases
             date = datetime.datetime.strptime(args.date, '%Y-%m-%d')
             kwargs['timestamp__range'] = [args.date, date+datetime.timedelta(1)]
 
+    if args.label: kwargs.update({'label': args.label})
     if args.main_file is not None: kwargs['main_file__startswith'] = args.main_file
     if args.version is not None: kwargs['version__startswith'] = args.version
     print(project.format_records(**kwargs))
