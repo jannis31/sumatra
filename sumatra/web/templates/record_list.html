@@ -223,10 +223,13 @@ $(document).ready(function() {
             return data.toFixed(2)+' s';
         }, "targets": [6]},                                                     // duration
         {"render": function(data, type, row) {
+            return "<a target='script_content' onclick=window.open('/"+row.project+"/"+row.label+"/script','script_content','width=640,height=600,scrollbars=yes,resizable=yes') style='cursor:pointer'><span class='glyphicon glyphicon-file'></span></a> "+data;
+        }, "targets": [9]},                                                     // mainfile
+        {"render": function(data, type, row) {
             if (data.length < 5) {
                 return data
             } else {
-                return '<span title="'+data+'">'+data.slice(0,5)+'</span>'
+                return "<a target='script_changes' onclick=window.open('/"+row.project+"/"+row.label+"/script_changes','script_changes','width=640,height=600,scrollbars=yes,resizable=yes') style='cursor:pointer'><span class='glyphicon glyphicon-duplicate'></span></a> <span title="+data+">"+data.slice(0,5)+"</span>"
             }
         }, "targets": [10]},                                                    // version
         {"render": function(data, type, row) {

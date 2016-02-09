@@ -29,7 +29,7 @@ from .formatting import get_formatter
 from . import dependency_finder
 from sumatra.core import TIMESTAMP_FORMAT
 from sumatra.users import get_user
-from .versioncontrol import VersionControlError
+from .versioncontrol import VersionControlError,get_working_copy
 import logging
 from pathlib import Path
 
@@ -224,6 +224,14 @@ class Record(object):
         """
         return self.launch_mode.generate_command(self.executable, self.main_file, self.script_arguments)
 
+    @property
+    def script_content(self):
+        wc = get_working_copy()
+        try:
+            return wc.content(self.version, file=self.main_file)
+        except:
+            return False
+
 
 class RecordDifference(object):
     """Represents the difference between two Record objects."""
@@ -382,3 +390,35 @@ class RecordDifference(object):
     @property
     def parameter_differences(self):
         return self.recordA.parameters.diff(self.recordB.parameters)
+
+    @property
+    def script_content_diff_left(self):
+        wc = get_working_copy()
+        repo = wc.repository._repository
+        record = self.recordA
+        script = record.script_content.split('\n')
+        try:
+            script_diff = repo.git.diff(self.recordB.version,record.version)
+            for line in script_diff.split('\n'):
+                if line[1:] in script and len(line[1:]) > 0:
+                    index = script.index(line[1:])
+                    script[index] = line
+            return '\n'.join(script)
+        except:
+            return False
+
+    @property
+    def script_content_diff_right(self):
+        wc = get_working_copy()
+        repo = wc.repository._repository
+        record = self.recordB
+        script = record.script_content.split('\n')
+        try:
+            script_diff = repo.git.diff(record.version,self.recordA.version)
+            for line in script_diff.split('\n'):
+                if line[1:] in script and len(line[1:]) > 0:
+                    index = script.index(line[1:])
+                    script[index] = line
+            return '\n'.join(script)
+        except:
+            return False

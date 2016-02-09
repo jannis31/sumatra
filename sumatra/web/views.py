@@ -622,20 +622,26 @@ def show_content(request, datastore_id):
     return HttpResponse(content, content_type=mimetype or "application/unknown")
 
 
-def show_script(request, project):
+def show_script(request, project, label):
     """ get the script content from the repos """
-    if os.path.exists(os.path.join(os.getcwd(),project)):
-        path = os.path.join(os.getcwd(),project)
-    else:
-        path = os.getcwd()
-    wc = get_working_copy(path)
-    digest = request.GET.get('digest', False)
-    main_file = request.GET.get('main_file', False)
+    record = Record.objects.get(label=label, project__id=project)
+    file_content = record.to_sumatra().script_content
+    if not file_content:
+        raise Http404
+    return HttpResponse('<p><span style="font-size: 16px; font-weight:bold">'+record.main_file+'</span><br><span>'+record.version+'</span></p><hr>'+file_content.replace(' ','&#160;').replace('\n', '<br />'))
+
+
+def show_script_changes(request, project, label):
+    """ get the script content from the repos """
+    record = Record.objects.get(label=label, project__id=project)
+    wc = get_working_copy()
     try:
-        file_content = wc.content(digest, main_file)
+        file_content = wc.changes(record.version)
     except:
         raise Http404
-    return HttpResponse('<p><span style="font-size: 15px; font-weight:bold">'+main_file+'</span> <span class="label">'+digest+'</span></p><hr>'+file_content.replace(' ','&#160;').replace('\n', '<br />'))
+    return HttpResponse('<p><span style="font-size: 16px; font-weight:bold">'+record.main_file+'</span><br><span>'+record.version+'</span></p><hr>'+file_content.replace(' ','&#160;').replace('\n', '<br />'))
+
+
 
 
 def compare_records(request, project):

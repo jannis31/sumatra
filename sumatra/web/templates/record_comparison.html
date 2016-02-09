@@ -90,6 +90,18 @@
         </div>
         {% endif %}
 
+        {% ifequal diff.recordA.main_file diff.recordB.main_file %}
+        <h3>Script content difference</h3>
+        <div class="row">
+            <div class="col-md-6">
+                {{diff.script_content_diff_left|linebreaks}}
+            </div>
+            <div class="col-md-6">
+                {{diff.script_content_diff_right|linebreaks}}
+            </div>
+        </div>
+        {% endifequal %}
+
         {% if diff.diff_differs %}
         <div class="row">
             <div class="col-md-6">
