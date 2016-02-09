@@ -403,7 +403,7 @@ class RecordDifference(object):
                 if line[1:] in script and len(line[1:]) > 0:
                     index = script.index(line[1:])
                     script[index] = line
-            return '\n'.join(script)
+            return script
         except:
             return False
 
@@ -419,6 +419,6 @@ class RecordDifference(object):
                 if line[1:] in script and len(line[1:]) > 0:
                     index = script.index(line[1:])
                     script[index] = line
-            return '\n'.join(script)
+            return script
         except:
             return False
