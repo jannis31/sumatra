@@ -91,18 +91,17 @@
         {% endif %}
 
         {% ifequal diff.recordA.main_file diff.recordB.main_file %}
-        <h5>Script content difference</h5>
         <hr>
         <div class="row">
             <div class="col-md-6">
-                {% for line in diff.script_content_diff_left %}
-                <div style="background-color:{% if line|slice:":1" == '+' %}YellowGreen{% elif line|slice:":1" == '-' %}Salmon{% endif %}">
+                {% for change,line in diff.script_content_diff_left %}
+                <div style="background-color:{% if change == '+' %}YellowGreen{% elif change == '-' %}Salmon{% endif %}">
                     <span style="display: inline-block; width:30px">{{forloop.counter}}</span> {{ line }} </div>
                 {% endfor %}
             </div>
             <div class="col-md-6">
-                {% for line in diff.script_content_diff_right %}
-                <div style="background-color:{% if line|slice:":1" == '+' %}YellowGreen{% elif line|slice:":1" == '-' %}Salmon{% endif %}">
+                {% for change,line in diff.script_content_diff_right %}
+                <div style="background-color:{% if change == '+' %}YellowGreen{% elif change == '-' %}Salmon{% endif %}">
                     <span style="display: inline-block; width:30px">{{forloop.counter}}</span> {{ line }} </div>
                 {% endfor %}
             </div>

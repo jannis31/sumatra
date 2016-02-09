@@ -397,13 +397,14 @@ class RecordDifference(object):
         repo = wc.repository._repository
         record = self.recordA
         script = record.script_content.split('\n')
+        script_changes = map(lambda x: (0,x), script)
         try:
             script_diff = repo.git.diff(self.recordB.version,record.version)
             for line in script_diff.split('\n'):
                 if line[1:] in script and len(line[1:]) > 0:
                     index = script.index(line[1:])
-                    script[index] = line
-            return script
+                    script_changes[index] = (line[0],line[1:])
+            return script_changes
         except:
             return False
 
@@ -413,12 +414,13 @@ class RecordDifference(object):
         repo = wc.repository._repository
         record = self.recordB
         script = record.script_content.split('\n')
+        script_changes = map(lambda x: (0,x), script)
         try:
             script_diff = repo.git.diff(record.version,self.recordA.version)
             for line in script_diff.split('\n'):
                 if line[1:] in script and len(line[1:]) > 0:
                     index = script.index(line[1:])
-                    script[index] = line
-            return script
+                    script_changes[index] = (line[0],line[1:])
+            return script_changes
         except:
             return False
