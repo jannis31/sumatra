@@ -642,8 +642,6 @@ def show_script_changes(request, project, label):
     return HttpResponse('<p><span style="font-size: 16px; font-weight:bold">'+record.main_file+'</span><br><span>'+record.version+'</span></p><hr>'+file_content.replace(' ','&#160;').replace('\n', '<br />'))
 
 
-
-
 def compare_records(request, project):
     record_labels = [request.GET['a'], request.GET['b']]
     db_records = Record.objects.using(_label_db.get(project,'default')).filter(label__in=record_labels, project__id=project)

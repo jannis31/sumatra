@@ -391,15 +391,16 @@ class RecordDifference(object):
     def parameter_differences(self):
         return self.recordA.parameters.diff(self.recordB.parameters)
 
-    @property
-    def script_content_diff_left(self):
+    def script_content_diff(self, record, other):
         wc = get_working_copy()
         repo = wc.repository._repository
-        record = self.recordA
         script = record.script_content.split('\n')
         script_changes = map(lambda x: (0,x), script)
         try:
-            script_diff = repo.git.diff(self.recordB.version,record.version)
+            if record.timestamp > other.timestamp:
+                script_diff = repo.git.diff(other.version,record.version)
+            else:
+                script_diff = repo.git.diff(record.version,other.version)
             for line in script_diff.split('\n'):
                 if line[1:] in script and len(line[1:]) > 0:
                     index = script.index(line[1:])
@@ -409,18 +410,9 @@ class RecordDifference(object):
             return False
 
     @property
-    def script_content_diff_right(self):
-        wc = get_working_copy()
-        repo = wc.repository._repository
-        record = self.recordB
-        script = record.script_content.split('\n')
-        script_changes = map(lambda x: (0,x), script)
-        try:
-            script_diff = repo.git.diff(record.version,self.recordA.version)
-            for line in script_diff.split('\n'):
-                if line[1:] in script and len(line[1:]) > 0:
-                    index = script.index(line[1:])
-                    script_changes[index] = (line[0],line[1:])
-            return script_changes
-        except:
-            return False
+    def recordA_script_content_diff(self):
+        return self.script_content_diff(self.recordA, self.recordB)
+
+    @property
+    def recordB_script_content_diff(self):
+        return self.script_content_diff(self.recordB, self.recordA)
