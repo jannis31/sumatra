@@ -94,14 +94,14 @@
         <hr>
         <div class="row">
             <div class="col-md-6">
-                {% for change,line in diff.recordA.script_content_diff %}
-                <div style="background-color:{% if change == '+' %}YellowGreen{% elif change == '-' %}Salmon{% endif %}">
+                {% for change,line in diff.recordA_script_content_diff %}
+                <div style="background-color:{% if change == '+' %}#eaffea{% elif change == '-' %}#ffdddd{% endif %}">
                     <span style="display: inline-block; width:30px">{{forloop.counter}}</span> {{ line }} </div>
                 {% endfor %}
             </div>
             <div class="col-md-6">
-                {% for change,line in diff.recordB.script_content_diff %}
-                <div style="background-color:{% if change == '+' %}YellowGreen{% elif change == '-' %}Salmon{% endif %}">
+                {% for change,line in diff.recordB_script_content_diff %}
+                <div style="background-color:{% if change == '+' %}#eaffea{% elif change == '-' %}#ffdddd{% endif %}">
                     <span style="display: inline-block; width:30px">{{forloop.counter}}</span> {{ line }} </div>
                 {% endfor %}
             </div>

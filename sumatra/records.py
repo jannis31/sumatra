@@ -404,7 +404,7 @@ class RecordDifference(object):
             for line in script_diff.split('\n'):
                 if line[1:] in script and len(line[1:]) > 0:
                     index = script.index(line[1:])
-                    script_changes[index] = (line[0],line[1:])
+                    script_changes[index] = (line[0],line)
             return script_changes
         except:
             return False

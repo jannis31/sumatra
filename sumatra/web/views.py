@@ -322,8 +322,8 @@ def datatable_record(request, project):
                 'date':         rec.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
                 'reason':       rec.reason,
                 'outcome':      rec.outcome,
-                'input_data':   map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.input_data.all()),
-                'output_data':  map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S')}, rec.output_data.all()),
+                'input_data':   map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S'), 'mimetype': (x.to_sumatra().metadata['mimetype'] or '')}, rec.input_data.all()),
+                'output_data':  map(lambda x: {'path': x.path, 'digest': x.digest, 'creation': x.creation.strftime('%Y-%m-%dT%H:%M:%S'), 'mimetype': (x.to_sumatra().metadata['mimetype'] or '')}, rec.output_data.all()),
                 'duration':     rec.duration,
                 'processes':    rec.launch_mode.get_parameters().get('n',1),
                 'executable':   rec.executable.name,
@@ -373,6 +373,7 @@ def datatable_data(request, project):
     data = []
     for dk in datakeys[start:start+length]:
         try:
+            metadata = dk.get_metadata()
             data.append({
                 'DT_RowId':             dk.path,
                 'project':              project,
@@ -380,7 +381,8 @@ def datatable_data(request, project):
                 'directory':            os.path.dirname(dk.path),
                 'filename':             os.path.basename(dk.path),
                 'digest':               dk.digest,
-                'size':                 dk.get_metadata()['size'],
+                'size':                 metadata['size'],
+                'mimetype':             metadata['mimetype'] or '',
                 # 'size':                 filters.filesizeformat(dk.get_metadata()['size']),
                 'creation':             dk.creation.strftime('%Y-%m-%d %H:%M:%S'),
                 'output_from_record':   dk.output_from_record.label,
@@ -401,6 +403,7 @@ def datatable_data(request, project):
 
 def datatable_image(request, project):
     columns = ['creation', 'path', 'output_from_record__label', 'output_from_record__reason', 'output_from_record__outcome', 'output_from_record__tags']
+    selected_tag = request.GET['tag']
     search_value = request.GET['search[value]']
     order = int(request.GET['order[0][column]'])
     order_dir = {'desc': '-', 'asc': ''}[request.GET['order[0][dir]']]
@@ -412,6 +415,10 @@ def datatable_image(request, project):
         .filter(output_from_record__project_id=project) \
         .filter(metadata__contains='image')
     imagesTotal = len(images)
+
+    # Filter by tag
+    if selected_tag != '':
+        images = images.filter(output_from_record__tags__contains=selected_tag)
 
     # Filter by search queries
     if search_value != '':

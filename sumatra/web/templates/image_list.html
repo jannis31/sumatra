@@ -11,11 +11,16 @@
 {% block navbar %}
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button">
-                    <span class="glyphicon glyphicon-tag"></span> <span id="tag-label">Tag</span> <span class="caret"></span></a>
+                    <span class="glyphicon glyphicon-tag"></span>
+                    <span id="tag-label">Tag</span>
+                    <span class="caret"></span>
+                </a>
                 <ul class="dropdown-menu" role="menu" id="tagList">
                     {% if tags %}
                         {% for tag in tags %}
-                        <li id="id_tag_{{tag.name}}"><a data-target="#" value="{{tag.name}}" class="tag">{{tag.name}}</a></li>
+                        <li id="id_tag_{{tag.name}}">
+                            <a data-target="#" value="{{tag.name}}" class="tag">{{tag.name}}</a>
+                        </li>
                         {% endfor %}
                         <li role="presentation" class="divider"></li>
                         <li ><a data-target="#" value="null" class="tag"><i>clear selection</i></a></li>
@@ -114,12 +119,17 @@ $(document).ready(function() {
                 return ''
             } else {
                 tags = data.split(',')
-                return '<button class="btn btn-default btn-xs tag">'+tags.join('</button> <button class="btn btn-default btn-xs tag">')+'</button>';
+                var rendered = [];
+                for (var i=0;i<tags.length;i++) {
+                    var tag = tags[i];
+                    rendered.push('<button class="btn btn-default btn-xs tag" value="'+ tag +'">' + tag + '</button>')
+                }
+                return rendered.join(' ');
             }
         }, "targets": [5]},                                                     // tags
     ]
 
-    var table = $('#images-table').dataTable({
+    var table = $('#images-table').DataTable({
         "processing":       true,
         "serverSide":       true,
         "ajax": {
@@ -137,26 +147,26 @@ $(document).ready(function() {
             { "data": "tags" },
             { "data": "parameters" },
         ],
-        "aLengthMenu": [[8, 32, 128], [8, 32, 128]],
-        // "dom":           'ftlp',
         "order":            [[ 0, "desc" ]],
         "columnDefs":       columnDefs,
-        "fnPreDrawCallback": function (oSettings) {
+        "preDrawCallback": function (settings) {
               // create a thumbs container if it doesn't exist. put it in the dataTables_scrollbody div
               if ($('#thumbs_container').length < 1)  $('#thumbgrid').append("<div id='thumbs_container' class='row'></div>");
-
               // clear out the thumbs container
               $('#thumbs_container').html('');
-
               return true;
-          },
-        "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-              $('#thumbs_container').append(aData['thumbgrid']);
+        },
+        "rowCallback": function(row, data) {
+              $('#thumbs_container').append(data['thumbgrid']);
               $('.thumb').removeClass().addClass('thumb').addClass(thumbgrid_view);
               $('.thumb div').addClass('thumbnail');
-
-              return nRow;
-          },
+              return row;
+        },
+        "drawCallback": function(settings) {
+            $('button.tag').on('click', tag_click_event);
+            $('button.tag').removeClass("active");
+            $('button.tag[value='+ selected_tag+']').addClass("active");
+        },
     });
 
     $('#thumbgrid-view').on('click', function() {
@@ -178,8 +188,8 @@ $(document).ready(function() {
         $('#thumbgrid').addClass('hidden')
     })
 
-    /* select tag from dropdown menu */
-    $('.tag').on('click', function () {
+    /* select tag from dropdown menu and from tag button */
+    function tag_click_event() {
         if ( selected_tag == $(this).attr('value') ) {
             selected_tag = 'null';
         } else {
@@ -195,9 +205,8 @@ $(document).ready(function() {
             $('#tag-label').html(selected_tag);
         }
         table.draw();
-        $('#id_button_tags .tag').removeClass("active");
-        $('#id_button_tags .tag[value='+ selected_tag+']').addClass("active");
-    });
+    };
+    $('#tagList .tag').on('click', tag_click_event);
 } );
     </script>
 {% endblock %}
