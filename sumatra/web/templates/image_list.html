@@ -118,10 +118,9 @@ $(document).ready(function() {
             if (data.length == 0) {
                 return ''
             } else {
-                tags = data.split(',')
                 var rendered = [];
-                for (var i=0;i<tags.length;i++) {
-                    var tag = tags[i];
+                for (var i=0;i<data.length;i++) {
+                    var tag = data[i];
                     rendered.push('<button class="btn btn-default btn-xs tag" value="'+ tag +'">' + tag + '</button>')
                 }
                 return rendered.join(' ');
@@ -163,7 +162,6 @@ $(document).ready(function() {
               return row;
         },
         "drawCallback": function(settings) {
-            $('button.tag').on('click', tag_click_event);
             $('button.tag').removeClass("active");
             $('button.tag[value='+ selected_tag+']').addClass("active");
         },
@@ -189,7 +187,7 @@ $(document).ready(function() {
     })
 
     /* select tag from dropdown menu and from tag button */
-    function tag_click_event() {
+    $('body').on('click', '.tag', function () {
         if ( selected_tag == $(this).attr('value') ) {
             selected_tag = 'null';
         } else {
@@ -205,8 +203,7 @@ $(document).ready(function() {
             $('#tag-label').html(selected_tag);
         }
         table.draw();
-    };
-    $('#tagList .tag').on('click', tag_click_event);
+    });
 } );
     </script>
 {% endblock %}

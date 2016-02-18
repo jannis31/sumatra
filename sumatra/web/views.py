@@ -330,7 +330,7 @@ def datatable_record(request, project):
                 'main_file':    rec.main_file,
                 'version':      rec.version,
                 'arguments':    rec.script_arguments,
-                'tags':         rec.tags,
+                'tags':         [tag.name for tag in rec.tag_objects()],
             })
         except:
             pass
@@ -448,7 +448,7 @@ def datatable_image(request, project):
                 'reason':       im.output_from_record.reason,
                 'outcome':      im.output_from_record.outcome,
                 'parameters':   im.output_from_record.parameters.content,
-                'tags':         im.output_from_record.tags,
+                'tags':         [tag.name for tag in im.output_from_record.tag_objects()],
                 'thumbgrid':    '<div class="thumb"><div class=""><a href="/%s/data/datafile?path=%s&digest=%s&creation=%s" title="%s"> \
                     <img src="/static/%s">  </a></div></div>' %(project, im.path, im.digest, im.creation.strftime('%Y-%m-%d %H:%M:%S'),im.path, im.path),
 
