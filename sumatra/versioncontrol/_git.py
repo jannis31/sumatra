@@ -102,28 +102,24 @@ class GitWorkingCopy(WorkingCopy):
         g = git.Git(self.path)
         return g.diff('HEAD', color='never')
 
-    def content(self, digest, file=None):
+    def content(self, filename, digest=None):
         """Get the file content from repository."""
+        if '/' in filename:
+            path_to_file = filename.split('/')
+            pardir_list, filename = path_to_file[:-1], path_to_file[-1]
+
+        curtree = digest is None
         repo = git.Repo(self.path)
         for item in repo.iter_commits('master'):
-            if item.hexsha == digest:
-                curtree = item.tree
-                if file is None:
-                    file_content = curtree.blobs[0].data_stream.read() # Get the latest added file content.
-                elif '/' in file:
-                    path_to_file = file.split('/')
-                    pardir_list, file = path_to_file[:-1], path_to_file[-1]
-                    for dirname in pardir_list:
-                        for subtree in curtree.trees:
-                            if subtree.name == dirname:
-                                curtree = subtree
-                                break
-                        else:
-                            return 'File content not found'
-                for blob in curtree.blobs:
-                    if blob.name == file:
-                        file_content = blob.data_stream.read()
-                        return file_content
+            if curtree:
+                for tree in item.tree.trees:
+                    for blob in tree.blobs:
+                        if blob.name == filename:
+                            return blob.data_stream.read()
+            else:
+                if item.hexsha.startswith(digest):
+                    curtree = True
+        return 'File content not found'
 
     def contains(self, path):
         """Does the repository contain the file with the given path?"""

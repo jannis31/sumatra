@@ -227,10 +227,7 @@ class Record(object):
     @property
     def script_content(self):
         wc = get_working_copy()
-        try:
-            return wc.content(self.version, file=self.main_file)
-        except:
-            return False
+        return wc.content(self.main_file, self.version)
 
 
 class RecordDifference(object):
