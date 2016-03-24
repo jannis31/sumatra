@@ -780,4 +780,8 @@ def script(argv):
     args = parser.parse_args(argv)
     project = load_project()
     record = project.get_record(args.label)
+    print(record.main_file)
+    print(record.version)
+    print(40*'-')
     print(record.script_content)
+    print(40*'-')
