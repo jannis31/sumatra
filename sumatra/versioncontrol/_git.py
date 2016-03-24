@@ -108,18 +108,15 @@ class GitWorkingCopy(WorkingCopy):
             path_to_file = filename.split('/')
             pardir_list, filename = path_to_file[:-1], path_to_file[-1]
 
-        curtree = digest is None
         repo = git.Repo(self.path)
-        for item in repo.iter_commits('master'):
-            if curtree:
-                for tree in item.tree.trees:
-                    for blob in tree.blobs:
-                        if blob.name == filename:
-                            return blob.data_stream.read()
-            else:
-                if item.hexsha.startswith(digest):
-                    curtree = True
-        return 'File content not found.'
+        try:
+            item = repo.commit(digest)
+            for tree in item.tree.trees:
+                for blob in tree.blobs:
+                    if blob.name == filename:
+                        return blob.data_stream.read()
+        except:
+            return 'File content not found.'
 
     def contains(self, path):
         """Does the repository contain the file with the given path?"""
