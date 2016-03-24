@@ -40,7 +40,7 @@ logger.addHandler(h)
 logger.debug("STARTING")
 
 modes = ("init", "configure", "info", "run", "list", "delete", "comment", "tag",
-         "repeat", "diff", "help", "export", "upgrade", "sync", "migrate", "version")
+         "repeat", "diff", "help", "export", "upgrade", "sync", "migrate", "version", "script")
 
 store_arg_help = "The argument can take the following forms: (1) `/path/to/sqlitedb` - DjangoRecordStore is used with the specified Sqlite database, (2) `http[s]://location` - remote HTTPRecordStore is used with a remote Sumatra server, (3) `postgres://username:password@hostname/databasename` - DjangoRecordStore is used with specified Postgres database."
 
@@ -768,3 +768,16 @@ def version(argv):
                             description=description)
     args = parser.parse_args(argv)
     print(sumatra.__version__)
+
+
+def script(argv):
+    """Print script content of the recording label."""
+    usage = "%(prog)s script"
+    description = "Print script content of the recording label."
+    parser = ArgumentParser(usage=usage,
+                            description=description)
+    parser.add_argument('label')
+    args = parser.parse_args(argv)
+    project = load_project()
+    record = project.get_record(args.label)
+    print(record.script_content)
