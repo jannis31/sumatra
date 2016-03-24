@@ -207,8 +207,8 @@ class TextFormatter(Formatter):
 
     def parameter_view(self):
         """ Return parameter information about a list of records as text, in a simple tabular format."""
-        tt = ParamsTable(self.records, max_column_width=13, seperator='|')
-        return str(tt)
+        pt = ParamsTable(self.records, max_column_width=13, seperator='|')
+        return str(pt)
 
     def keyword(self, keyword=None):
         """Return a list of record labels plus one content of the record, one per line."""
@@ -306,7 +306,7 @@ class ParamsTable(object):
         else:
             format = self.seperator.join(len(column_widths)*["%s"]) + "\n"
         assert len(column_widths) == len(self.headers)
-        output = format % tuple(h[:self.max_column_width] for h in self.headers)
+        output = format % tuple('%s' %h[:self.max_column_width] for h in self.headers)
         for row in self.rows:
             parameter_set = row.parameters
             if hasattr(parameter_set, 'as_dict'):
@@ -520,8 +520,8 @@ class CSVFormatter(Formatter):
         Return information about a list of records as text, in a simple
         tabular format.
         """
-        tt = ParamsTable(self.records, max_column_width=30, seperator=';')
-        return str(tt)
+        pt = ParamsTable(self.records, max_column_width=30, seperator=';')
+        return str(pt)
 
     def output_files(self):
         """Return a list of record files, one per line."""
@@ -558,8 +558,8 @@ class TSVFormatter(Formatter):
         Return information about a list of records as text, in a simple
         tabular format.
         """
-        tt = ParamsTable(self.records, max_column_width=30, seperator='\t')
-        return str(tt)
+        pt = ParamsTable(self.records, max_column_width=30, seperator='\t')
+        return str(pt)
 
     def output_files(self):
         """Return a list of record files, one per line."""
