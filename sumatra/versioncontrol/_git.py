@@ -119,7 +119,7 @@ class GitWorkingCopy(WorkingCopy):
             else:
                 if item.hexsha.startswith(digest):
                     curtree = True
-        return 'File content not found'
+        return 'File content not found.'
 
     def contains(self, path):
         """Does the repository contain the file with the given path?"""

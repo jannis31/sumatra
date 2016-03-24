@@ -632,10 +632,7 @@ def show_content(request, datastore_id):
 def show_script(request, project, label):
     """ get the script content from the repos """
     record = Record.objects.get(label=label, project__id=project)
-    file_content = record.to_sumatra().script_content
-    if not file_content:
-        raise Http404
-    return HttpResponse('<p><span style="font-size: 16px; font-weight:bold">'+record.main_file+'</span><br><span>'+record.version+'</span></p><hr>'+file_content.replace(' ','&#160;').replace('\n', '<br />'))
+    return HttpResponse('<p><span style="font-size: 16px; font-weight:bold">'+record.main_file+'</span><br><span>'+record.version+'</span></p><hr>'+record.to_sumatra().script_content.replace(' ','&#160;').replace('\n', '<br />'))
 
 
 def show_script_changes(request, project, label):
