@@ -229,6 +229,18 @@ class Record(object):
         wc = get_working_copy()
         return wc.content(self.main_file, self.version)
 
+    @property
+    def filename(self):
+        return os.path.basename(self.main_file)
+
+    @property
+    def date(self):
+        return self.timestamp.date()
+
+    @property
+    def time(self):
+        return self.timestamp.time()
+
 
 class RecordDifference(object):
     """Represents the difference between two Record objects."""

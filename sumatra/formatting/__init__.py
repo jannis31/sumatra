@@ -269,7 +269,7 @@ class ParamsTable(object):
         self.seperator = seperator
 
     def get_headers(self):
-        headers = [u'label',u'version',u'main_file',u'duration']
+        headers = [u'label',u'version',u'filename',u'date',u'time',u'duration']
         param_headers = []
         for row in self.rows:
             parameter_set = row.parameters
@@ -285,7 +285,7 @@ class ParamsTable(object):
     def calculate_column_widths(self):
         column_widths = []
         for header in self.headers:
-            if header in [u'label',u'version',u'main_file',u'duration']:
+            if header in [u'label',u'version',u'filename',u'date',u'time',u'duration']:
                 column_width = max([len(header)] + [len(str(getattr(row, header))) for row in self.rows])
             else:
                 column_val_width = []
@@ -313,8 +313,8 @@ class ParamsTable(object):
                 parameter_set = parameter_set.as_dict()
             parameter_set = parameters.nesteddictflatten(parameter_set)
             output += format % tuple(
-                [str(getattr(row, header))[:self.max_column_width] for header in self.headers[:4]]
-               +[str(parameter_set.get(header,''))[:self.max_column_width] for header in self.headers[4:]])
+                [str(getattr(row, header))[:self.max_column_width] for header in self.headers[:6]]
+               +[str(parameter_set.get(header,''))[:self.max_column_width] for header in self.headers[6:]])
         return output
 
 
