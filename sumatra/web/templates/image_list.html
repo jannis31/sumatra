@@ -102,7 +102,7 @@ $(document).ready(function() {
         {"render": function(data, type, row) {
             return '<div class=""><a href="/'+row.project+'/data/datafile?'+
                 'path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" title="'+row.path+'">'+
-                '<img src="/static/'+row.path+'" style="width:250px">  </a></div>'
+                '<img src="/'+row.project+'/data/'+row.datastore+'?path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" style="width:250px">  </a></div>'
         }, "targets": [1]},                                                     // image
         {"render": function(data, type, row) {
             return '<a href="/'+row.project+'/'+data+'/">'+data+'</a>'
@@ -150,16 +150,17 @@ $(document).ready(function() {
         "columnDefs":       columnDefs,
         "preDrawCallback": function (settings) {
               // create a thumbs container if it doesn't exist. put it in the dataTables_scrollbody div
-              if ($('#thumbs_container').length < 1)  $('#thumbgrid').append("<div id='thumbs_container' class='row'></div>");
-              // clear out the thumbs container
-              $('#thumbs_container').html('');
-              return true;
-        },
-        "rowCallback": function(row, data) {
-              $('#thumbs_container').append(data['thumbgrid']);
-              $('.thumb').removeClass().addClass('thumb').addClass(thumbgrid_view);
-              $('.thumb div').addClass('thumbnail');
-              return row;
+              if ($('#thumbs_container').length < 1) {$('#thumbgrid').append("<div id='thumbs_container' class='row'></div>");}
+              $('#thumbs_container').html('');                  // clear out the thumbs container
+              return true
+          },
+        "rowCallback": function( row, data ) {
+            $('#thumbs_container').append('<div class="thumb"><div class="thumbnail">' +
+                '<a href=/"'+data.project+'/data/datafile?path='+data.path+'&digest='+data.digest+'&creation='+data.date+'">' +
+                '<img src="/'+data.project+'/data/'+data.datastore+'?path='+data.path+'&digest='+data.digest+'&creation='+data.creation+'">' +
+                '</a></div></div>');
+            $('.thumb').addClass(thumbgrid_view);
+            return row
         },
         "drawCallback": function(settings) {
             $('button.tag').removeClass("active");

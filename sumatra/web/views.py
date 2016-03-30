@@ -444,6 +444,7 @@ def datatable_image(request, project):
                 'creation':     im.creation.strftime('%Y-%m-%dT%H:%M:%S'),
                 'path':         im.path,
                 'digest':       im.digest,
+                'datastore':    im.output_from_record.datastore.id,
                 'record':       im.output_from_record.label,
                 'reason':       im.output_from_record.reason,
                 'outcome':      im.output_from_record.outcome,
@@ -615,7 +616,7 @@ def delete_records(request, project):
     return HttpResponse('OK')
 
 
-def show_content(request, datastore_id):
+def show_content(request, project, datastore_id):
     datastore = Datastore.objects.using(_label_db.get(project,'default')).get(pk=datastore_id).to_sumatra()
     attrs = dict(path=request.GET['path'],
                  digest=request.GET['digest'],
