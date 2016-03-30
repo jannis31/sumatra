@@ -222,9 +222,8 @@ def init(argv):
                       label_generator=args.labelgenerator,
                       timestamp_format=args.timestamp_format)
     if os.path.exists('.smt') and project.record_store.has_project(project.name):
-        f = open('.smt/labels', 'w')
-        f.writelines(project.format_records(tags=None, mode='short', format='text', reverse=False))
-        f.close()
+        with open('.smt/labels', 'w') as f:
+            f.write('\n'.join(project.get_labels()))
     project.save()
 
 
