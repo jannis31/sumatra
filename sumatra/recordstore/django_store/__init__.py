@@ -210,6 +210,11 @@ class DjangoRecordStore(RecordStore):
             db_obj.save(using=self._db_label)
         return db_obj
 
+    def _init(self,project):
+        self._get_db_obj('Repository', project.default_repository)
+        self._get_db_obj('Datastore', project.data_store)
+        self._get_db_obj('Datastore', project.input_datastore)
+
     def list_projects(self):
         models = self._get_models()
         return [project.id for project in models.Project.objects.using(self._db_label).all()]

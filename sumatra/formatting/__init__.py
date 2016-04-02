@@ -227,8 +227,11 @@ class TextFormatter(Formatter):
 
     def output_files(self):
         """Return a list of record files, one per line."""
-        a = [[f.path for f in r.output_data] for r in self.records]
-        return '\n'.join(reduce(operator.add, a))
+        # a = [[f.path for f in r.output_data] for r in self.records]
+        # return '\n'.join(reduce(operator.add, a))
+        dt = DataTable(self.records, max_column_width=20, seperator='|')
+        return str(dt)
+
 
 
 class TextTable(object):
@@ -315,6 +318,46 @@ class ParamsTable(object):
             output += format % tuple(
                 [str(getattr(row, header))[:self.max_column_width] for header in self.headers[:6]]
                +[str(parameter_set.get(header,''))[:self.max_column_width] for header in self.headers[6:]])
+        return output
+
+class DataTable(object):
+
+    def __init__(self, rows, max_column_width=20, seperator='|'):
+        self.rows = rows
+        self.headers = self.get_headers()
+        self.max_column_width = max_column_width
+        self.seperator = seperator
+
+    def get_headers(self):
+        return ['path', 'creation', 'digest', 'size', 'mimetype']
+
+    def calculate_column_widths(self):
+        column_widths = []
+        for header in self.headers:
+            column_val_width = []
+            for row in self.rows:
+                for output_file in row.output_data:
+                    if header in output_file.__dict__:
+                        column_val_width.append(len(str(output_file.__dict__[header])))
+                    elif header in output_file.__dict__['metadata']:
+                        column_val_width.append(len(str(output_file.__dict__['metadata'][header])))
+            column_width = max([len(header)] + column_val_width)
+            column_widths.append(min(self.max_column_width, column_width))
+        return column_widths
+
+    def __str__(self):
+        column_widths = self.calculate_column_widths()
+        if self.seperator == '|':
+            format = "| " + " | ".join("%%-%ds" % w for w in column_widths) + " |\n"
+        else:
+            format = self.seperator.join(len(column_widths)*["%s"]) + "\n"
+        assert len(column_widths) == len(self.headers)
+        output = format % tuple(h[:self.max_column_width] for h in self.headers)
+        for row in self.rows:
+            for output_file in row.output_data:
+                output += format % tuple(
+                    [str(getattr(output_file, header))[:self.max_column_width] for header in self.headers[:3]]
+                    +[str(output_file.metadata[header])[:self.max_column_width] for header in self.headers[3:]])
         return output
 
 

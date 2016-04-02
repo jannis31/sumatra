@@ -136,6 +136,7 @@ class Project(object):
 
     def save(self):
         """Save state to some form of persistent storage. (file, database)."""
+        self.record_store._init(self)
         state = {}
         for name in ('name', 'default_executable', 'default_repository',
                      'default_launch_mode', 'data_store', 'record_store',

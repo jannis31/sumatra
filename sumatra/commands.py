@@ -437,7 +437,7 @@ def list(argv):  # add 'report' and 'log' as aliases
     parser.add_argument('-P', '--parameter_view', action="store_const", const="parameter_view",
                         dest="mode", help="list records with a set of parameter")
     parser.add_argument('-O', '--output_files', action="store_const", const="output_files",
-                        dest="mode", help="list output files")
+                        dest="mode", help="list output files from records.")
     parser.add_argument('-r', '--reverse', action="store_true", dest="reverse", default=False,
                         help="list records in reverse order (default: newest first)")
     parser.add_argument('-n', '--number', help="display the last NUMBER of records")
