@@ -20,6 +20,7 @@ from ..core import component, component_type, get_registered_components
 import parameters
 from functools import reduce
 import operator
+import os
 
 
 fields = ['label', 'timestamp', 'reason', 'outcome', 'duration', 'repository',
@@ -329,7 +330,7 @@ class DataTable(object):
         self.seperator = seperator
 
     def get_headers(self):
-        return ['path', 'creation', 'digest', 'size', 'mimetype']
+        return ['directory', 'filename', 'digest', 'creation', 'size', 'mimetype']
 
     def calculate_column_widths(self):
         column_widths = []
@@ -337,6 +338,10 @@ class DataTable(object):
             column_val_width = []
             for row in self.rows:
                 for output_file in row.output_data:
+                    if header == 'directory':
+                        column_val_width.append(len(str(os.path.dirname(output_file.path))))
+                    if header == 'filename':
+                        column_val_width.append(len(str(os.path.basename(output_file.path))))
                     if header in output_file.__dict__:
                         column_val_width.append(len(str(output_file.__dict__[header])))
                     elif header in output_file.__dict__['metadata']:
@@ -356,8 +361,10 @@ class DataTable(object):
         for row in self.rows:
             for output_file in row.output_data:
                 output += format % tuple(
-                    [str(getattr(output_file, header))[:self.max_column_width] for header in self.headers[:3]]
-                    +[str(output_file.metadata[header])[:self.max_column_width] for header in self.headers[3:]])
+                    [str(os.path.dirname(output_file.path)[:self.max_column_width])]
+                    +[str(os.path.basename(output_file.path)[:self.max_column_width])]
+                    +[str(getattr(output_file, header))[:self.max_column_width] for header in self.headers[2:4]]
+                    +[str(output_file.metadata[header])[:self.max_column_width] for header in self.headers[4:]])
         return output
 
 
