@@ -40,7 +40,8 @@ logger.addHandler(h)
 logger.debug("STARTING")
 
 modes = ("init", "configure", "info", "run", "list", "delete", "comment", "tag",
-         "repeat", "diff", "help", "export", "upgrade", "sync", "migrate", "version", "script")
+         "repeat", "diff", "help", "export", "upgrade", "sync", "migrate", "version",
+         "script", "compare")
 
 store_arg_help = "The argument can take the following forms: (1) `/path/to/sqlitedb` - DjangoRecordStore is used with the specified Sqlite database, (2) `http[s]://location` - remote HTTPRecordStore is used with a remote Sumatra server, (3) `postgres://username:password@hostname/databasename` - DjangoRecordStore is used with specified Postgres database."
 
@@ -784,3 +785,45 @@ def script(argv):
     print(80*'-')
     print(record.script_content)
     print(80*'-')
+
+
+def compare(argv):
+    """Compare the parameter set of a record with the current file."""
+    usage = "%(prog)s compare PATH LABEL"
+    description = "Compare the parameter set of a record with the current file."
+    parser = ArgumentParser(usage=usage,
+                            description=description)
+    parser.add_argument('file')
+    parser.add_argument('label')
+    args = parser.parse_args(argv)
+
+    file_parameters = build_parameters(args.file)
+    project = load_project()
+    record = project.get_record(args.label)
+
+    d1 = file_parameters.values
+    d2 = record.parameters.values
+    s1 = set(d1)
+    s2 = set(d2)
+
+    s3 = set.intersection(s1,s2)
+    s4 = set.difference(s1,s2)
+    s5 = set.difference(s2,s1)
+
+    tot1 = []
+    tot2 = [[ii,d1[ii]] for ii in s4]
+    tot3 = [[ii,d2[ii]] for ii in s5]
+
+    for ii in s3:
+        if d1[ii]==d2[ii]:
+            tot1.append([ii,d1[ii],d2[ii]])
+        else:
+            tot1.append([ii,'\033[92m'+str(d1[ii]),'\033[91m'+str(d2[ii])+'\033[0m'])
+
+    from tabulate import tabulate
+    print(tabulate(tot1,headers=['key','value']))
+    print('\033[92m')
+    print(tabulate(tot2,headers=['key','value - only in parameter file']))
+    print('\033[91m')
+    print(tabulate(tot3,headers=['key','value - only in record']))
+    print('\033[0m')
