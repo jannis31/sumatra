@@ -821,7 +821,7 @@ def compare(argv):
             tot1.append([ii,'\033[92m'+str(d1[ii]),'\033[91m'+str(d2[ii])+'\033[0m'])
 
     from tabulate import tabulate
-    print(tabulate(tot1,headers=['key','value']))
+    print(tabulate(tot1,headers=['key','file','record']))
     print('\033[92m')
     print(tabulate(tot2,headers=['key','value - only in parameter file']))
     print('\033[91m')
