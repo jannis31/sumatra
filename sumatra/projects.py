@@ -226,18 +226,22 @@ class Project(object):
     def launch(self, parameters={}, input_data=[], script_args="",
                executable='default', repository='default', main_file='default',
                version='current', launch_mode='default', label=None, reason=None,
-               timestamp_format='default', repeats=None):
+               timestamp_format='default', repeats=None,
+               commit=True, profile=False):
         """Launch a new simulation or analysis."""
         record = self.new_record(parameters, input_data, script_args,
                                  executable, repository, main_file, version,
                                  launch_mode, label, reason, timestamp_format)
-        record.run(with_label=self.data_label)
+        record.run(with_label=self.data_label, profile=profile)
         if 'matlab' in record.executable.name.lower():
             record.register(record.repository.get_working_copy())
         if repeats:
             record.repeats = repeats
-        self.add_record(record)
-        self.save()
+        if commit:
+            self.add_record(record)
+            self.save()
+        else:
+            print('Warning! This simulation is not saved in database.')
         return record.label
 
     def update_code(self, working_copy, version='current'):

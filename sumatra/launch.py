@@ -92,7 +92,7 @@ class LaunchMode(object):
         """Return a string containing the command to be launched."""
         raise NotImplementedError("must be impemented by sub-classes")
 
-    def run(self, executable, main_file, arguments, append_label=None):
+    def run(self, executable, main_file, arguments, append_label=None, profile=False):
         """
         Run a computation in a shell, with the given executable, script and
         arguments. If `append_label` is provided, it is appended to the
@@ -100,7 +100,7 @@ class LaunchMode(object):
         False otherwise.
         """
         self.check_files(executable, main_file)
-        cmd = self.generate_command(executable, main_file, arguments)
+        cmd = self.generate_command(executable, main_file, arguments, profile=profile)
         if append_label:
             cmd += " " + append_label
         if 'matlab' in executable.name.lower():
@@ -175,14 +175,18 @@ class SerialLaunchMode(LaunchMode):
         else:
             check_files_exist(executable.path)
 
-    def generate_command(self, executable, main_file, arguments):
+    def generate_command(self, executable, main_file, arguments, profile=False):
         if main_file is not None:
             if isinstance(executable, MatlabExecutable):
                 #if sys.platform == 'win32' or sys.platform == 'win64':
                 cmd = "%s -nodesktop -r \"%s('%s')\"" % (executable.name, main_file.split('.')[0], arguments)  # only for Windows
                 # cmd = "%s -nodesktop -r \"%s('%s')\"" %(executable.name, main_file.split('.')[0], 'in.param')  # only for Windows
             else:
-                cmd = "%s %s %s %s" % (executable.path, executable.options, main_file, arguments)
+                if profile:
+                    label = arguments.split('.')[0]
+                    cmd = "%s -m cProfile -s cumtime -o .smt/cprofile/%s.cprof %s %s %s" % (executable.path, label, executable.options, main_file, arguments)
+                else:
+                    cmd = "%s %s %s %s" % (executable.path, executable.options, main_file, arguments)
         else:
             if executable.path == executable.name:  # temporary hack
                 cmd = "./%s %s %s" % (executable.path, executable.options, arguments)

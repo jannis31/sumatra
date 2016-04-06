@@ -367,6 +367,10 @@ def run(argv):
     parser.add_argument('-D', '--debug', action='store_true', help="print debugging information.")
     parser.add_argument('-i', '--stdin', help="specify the name of a file that should be connected to standard input.")
     parser.add_argument('-o', '--stdout', help="specify the name of a file that should be connected to standard output.")
+    parser.add_argument('-c', '--commit', action="store_false", dest="commit", default=True,
+                        help="commit a record to db (default: True)")
+    parser.add_argument('-p', '--profile', action="store_true", dest="profile", default=False,
+                        help="deterministic profiling of Python programs")
 
     args, user_args = parser.parse_known_args(argv)
     user_args = [str(arg) for arg in user_args]  # unifying types for Py2/Py3
@@ -404,13 +408,18 @@ def run(argv):
     if reason:
         reason = reason.strip('\'"')
 
+    if args.profile and not os.path.exists('.smt/cprofile'):
+        os.makedirs('.smt/cprofile')
+
     label = args.label
     try:
         run_label = project.launch(parameters, input_data, script_args,
                                    label=label, reason=reason,
                                    executable=executable,
                                    main_file=args.main or 'default',
-                                   version=args.version or 'current')
+                                   version=args.version or 'current',
+                                   commit=args.commit,
+                                   profile=args.profile)
     except (UncommittedModificationsError, MissingInformationError) as err:
         print(err)
         sys.exit(1)

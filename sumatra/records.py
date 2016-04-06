@@ -122,7 +122,7 @@ class Record(object):
         # Record information about the current user
         self.user = get_user(working_copy)
 
-    def run(self, with_label=False):
+    def run(self, with_label=False, profile=False):
         """
         Launch the simulation or analysis.
 
@@ -155,7 +155,8 @@ class Record(object):
         # Run simulation/analysis
         start_time = time.time()
         result = self.launch_mode.run(self.executable, self.main_file,
-                                      script_arguments, data_label)
+                                      script_arguments, data_label,
+                                      profile=profile)
         self.duration = time.time() - start_time
 
         # try to get stdout_stderr from launch_mode
