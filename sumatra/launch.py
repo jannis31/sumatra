@@ -184,7 +184,7 @@ class SerialLaunchMode(LaunchMode):
             else:
                 if profile:
                     label = arguments.split('.')[0]
-                    cmd = "%s -m cProfile -s cumtime -o .smt/cprofile/%s.cprof %s %s %s" % (executable.path, label, executable.options, main_file, arguments)
+                    cmd = "%s -m cProfile -s cumtime -o .smt/cprofile/%s.prof %s %s %s" % (executable.path, label, executable.options, main_file, arguments)
                 else:
                     cmd = "%s %s %s %s" % (executable.path, executable.options, main_file, arguments)
         else:
