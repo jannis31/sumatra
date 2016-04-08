@@ -37,10 +37,10 @@
                 </a> -->
                 <button class="btn btn-default btn-sm" id="image-table-view">
                     <span class="glyphicon glyphicon-th-list"></span></button>
-                <button class="btn btn-default btn-sm" id="thumbgrid-view">
-                    <span class="glyphicon glyphicon-th"></span></button>
                 <button class="btn btn-default btn-sm" id="thumbgrid-view-large">
                     <span class="glyphicon glyphicon-th-large"></span></button>
+                <button class="btn btn-default btn-sm" id="thumbgrid-view">
+                    <span class="glyphicon glyphicon-th"></span></button>
             </div>
 {% endblock %}
 
@@ -54,12 +54,12 @@
     <thead>
     <tr>
       <th data-orderable="false">Image</th>
-      <th>Date/Time</th>
+      <th>Record info</th>
       <th>Output of</th>
       <th>Reason</th>
       <th>Outcome</th>
       <th>Tags</th>
-      <!-- <th>Parameter</th> -->
+      <th>Parameter</th>
     </tr>
     </thead>
 
@@ -102,19 +102,66 @@ $(document).ready(function() {
         {"render": function(data, type, row) {
             return '<div class=""><a href="/'+row.project+'/data/datafile?'+
                 'path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" title="'+row.path+'">'+
-                '<img src="/'+row.project+'/data/'+row.datastore+'?path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" style="width:100%">  </a></div>'
-        }, "width": "30%", "targets": [0]},                                                     // image
+                '<img src="/'+row.project+'/data/'+row.datastore+'?path='+row.path+'&digest='+row.digest+'&creation='+row.creation+'" style="width:100%" alt="'+row.path+'">  </a></div>'
+        }, "width": "50%", "targets": [0]},                                     // image
+        {"render": function(data, type, row) {
+            if (data.length == 0) {
+                return ''
+            } else {
+                var rendered = [];
+
+                rendered.push('<dl>')
+                rendered.push('<dt>Date/Time</dt>')
+                rendered.push('<dd>'+data+'</dd>');
+                rendered.push('<dt>Output of</dt>')
+                rendered.push("<dd><a target='script_content' onclick=window.open('/"+row.project+"/"+row.record+"/script','script_content','width=640,height=600,scrollbars=yes,resizable=yes') style='cursor:pointer'><i class='fa fa-file-code-o'></i></a>"+
+                    ' <a href="/'+row.project+'/'+row.record+'/">'+row.record+'</a></dd>')
+                rendered.push('<dt>Reason</dt>')
+                rendered.push('<dd>')
+                if (row.reason.length < 200) {
+                    rendered.push(row.reason)
+                } else {
+                    rendered.push('<span title="'+row.reason+'">'+row.reason.slice(0,200)+'...</span>')
+                }
+                rendered.push('</dd>')
+                rendered.push('<dt>Outcome</dt>')
+                rendered.push('<dd>')
+                if (row.outcome.length < 200) {
+                    rendered.push(row.outcome)
+                } else {
+                    rendered.push('<span title="'+row.outcome+'">'+row.outcome.slice(0,200)+'...</span>')
+                }
+                rendered.push('</dd>')
+                rendered.push('<dt>Tags</dt>')
+                rendered.push('<dd>')
+                for (var i=0;i<row.tags.length;i++) {
+                    var tag = row.tags[i];
+                    rendered.push('<button class="btn btn-default btn-xs tag" value="'+ tag +'">' + tag + '</button>')
+                }
+                rendered.push('</dd>')
+                rendered.push('<dt>Parameters</dt>')
+                rendered.push('<dd>')
+                if (row.parameters.length < 200) {
+                    rendered.push(row.parameters)
+                } else {
+                    rendered.push('<span title="'+row.parameters+'">'+row.parameters.slice(0,200)+'...</span>')
+                }
+                rendered.push('</dd>')
+                rendered.push('</dl>')
+                return rendered.join(' ');
+            }
+        }, "targets": [1]},
         {"render": function(data, type, row) {
             return "<a target='script_content' onclick=window.open('/"+row.project+"/"+data+"/script','script_content','width=640,height=600,scrollbars=yes,resizable=yes') style='cursor:pointer'><i class='fa fa-file-code-o'></i></a>"+
             ' <a href="/'+row.project+'/'+data+'/">'+data+'</a>'
-        }, "targets": [2]},                                                     // record
+        }, "targets": [2], "visible": false},                                                     // record
         {"render": function(data, type, row) {
             if (data.length < 200) {
                 return data
             } else {
                 return '<span title="'+data+'">'+data.slice(0,200)+'...</span>'
             }
-        }, "targets": [3,4]},                                                   // reason,outcome
+        }, "targets": [3,4,6], "visible": false},                                                   // reason,outcome
         {"render": function(data, type, row) {
             if (data.length == 0) {
                 return ''
@@ -126,8 +173,8 @@ $(document).ready(function() {
                 }
                 return rendered.join(' ');
             }
-        }, "targets": [5]},                                                     // tags
-    ]
+        }, "targets": [5], "visible": false},                                                     // tags
+        ]
 
     var table = $('#images-table').DataTable({
         "processing":       true,
@@ -145,7 +192,7 @@ $(document).ready(function() {
             { "data": "reason" },
             { "data": "outcome" },
             { "data": "tags" },
-            // { "data": "parameters" },
+            { "data": "parameters" },
         ],
         "order":            [[ 1, "desc" ]],
         "columnDefs":       columnDefs,
