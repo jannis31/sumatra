@@ -116,37 +116,45 @@ $(document).ready(function() {
                 rendered.push('<dt>Output of</dt>')
                 rendered.push("<dd><a target='script_content' onclick=window.open('/"+row.project+"/"+row.record+"/script','script_content','width=640,height=600,scrollbars=yes,resizable=yes') style='cursor:pointer'><i class='fa fa-file-code-o'></i></a>"+
                     ' <a href="/'+row.project+'/'+row.record+'/">'+row.record+'</a></dd>')
-                rendered.push('<dt>Reason</dt>')
-                rendered.push('<dd>')
-                if (row.reason.length < 200) {
-                    rendered.push(row.reason)
-                } else {
-                    rendered.push('<span title="'+row.reason+'">'+row.reason.slice(0,200)+'...</span>')
+                if (row.reason.length > 0) {
+                    rendered.push('<dt>Reason</dt>')
+                    rendered.push('<dd>')
+                    if (row.reason.length < 200) {
+                        rendered.push(row.reason)
+                    } else {
+                        rendered.push('<span title="'+row.reason+'">'+row.reason.slice(0,200)+'...</span>')
+                    }
+                    rendered.push('</dd>')
                 }
-                rendered.push('</dd>')
-                rendered.push('<dt>Outcome</dt>')
-                rendered.push('<dd>')
-                if (row.outcome.length < 200) {
-                    rendered.push(row.outcome)
-                } else {
-                    rendered.push('<span title="'+row.outcome+'">'+row.outcome.slice(0,200)+'...</span>')
+                if (row.outcome.length > 0) {
+                    rendered.push('<dt>Outcome</dt>')
+                    rendered.push('<dd>')
+                    if (row.outcome.length < 200) {
+                        rendered.push(row.outcome)
+                    } else {
+                        rendered.push('<span title="'+row.outcome+'">'+row.outcome.slice(0,200)+'...</span>')
+                    }
+                    rendered.push('</dd>')
                 }
-                rendered.push('</dd>')
-                rendered.push('<dt>Tags</dt>')
-                rendered.push('<dd>')
-                for (var i=0;i<row.tags.length;i++) {
-                    var tag = row.tags[i];
-                    rendered.push('<button class="btn btn-default btn-xs tag" value="'+ tag +'">' + tag + '</button>')
+                if (row.tags.length > 0) {
+                    rendered.push('<dt>Tags</dt>')
+                    rendered.push('<dd>')
+                    for (var i=0;i<row.tags.length;i++) {
+                        var tag = row.tags[i];
+                        rendered.push('<button class="btn btn-default btn-xs tag" value="'+ tag +'">' + tag + '</button>')
+                    }
+                    rendered.push('</dd>')
                 }
-                rendered.push('</dd>')
-                rendered.push('<dt>Parameters</dt>')
-                rendered.push('<dd>')
-                if (row.parameters.length < 200) {
-                    rendered.push(row.parameters)
-                } else {
-                    rendered.push('<span title="'+row.parameters+'">'+row.parameters.slice(0,200)+'...</span>')
+                if (row.parameters.length > 0) {
+                    rendered.push('<dt>Parameters</dt>')
+                    rendered.push('<dd>')
+                    if (row.parameters.length < 200) {
+                        rendered.push(row.parameters)
+                    } else {
+                        rendered.push('<span title="'+row.parameters+'">'+row.parameters.slice(0,200)+'...</span>')
+                    }
+                    rendered.push('</dd>')
                 }
-                rendered.push('</dd>')
                 rendered.push('</dl>')
                 return rendered.join(' ');
             }
