@@ -146,6 +146,7 @@ $(document).ready(function() {
                     rendered.push('</dd>')
                 }
                 if (row.parameters.length > 0) {
+                    rendered.push('<div style="display:none">')
                     rendered.push('<dt>Parameters</dt>')
                     rendered.push('<dd>')
                     if (row.parameters.length < 200) {
@@ -154,6 +155,7 @@ $(document).ready(function() {
                         rendered.push('<span title="'+row.parameters+'">'+row.parameters.slice(0,200)+'...</span>')
                     }
                     rendered.push('</dd>')
+                    rendered.push('</div>')
                 }
                 rendered.push('</dl>')
                 return rendered.join(' ');
